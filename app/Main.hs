@@ -53,7 +53,7 @@ previewServer = do
   putStrLn "Listening on http://localhost:9000"
   putStrLn "URL Copied to clipboard!"
   Clipboard.setClipboardString "http://localhost:9000/index.html"
-  Warp.run 9000 $ Static.staticApp $ Static.defaultWebAppSettings "dist"
+  Warp.run 9000 $ Static.staticApp $ Static.defaultFileServerSettings "dist"
 
 runBuild :: IO ()
 runBuild = shakeArgs shakeOptions { shakeVerbosity = Chatty } $
@@ -77,7 +77,10 @@ runBuild = shakeArgs shakeOptions { shakeVerbosity = Chatty } $
     -- build the syntax highlighing css
     "dist/css/syntax.css" %> buildSyntaxCss
     -- build the main table of contents
-    "dist/index.html" %> buildIndex postCache -- rule for actually building posts "dist/posts//*.html" %> buildPost postCache
+    "dist/index.html" %> buildIndex postCache
+    -- rule for actually building posts
+    "dist/drafts//*.html" %> buildPost postCache
+    "dist/posts//*.html" %> buildPost postCache
     -- rule for actually building tikz images
     "dist/tikz//*.png" %> buildTikz
 
@@ -139,7 +142,7 @@ newtype PostFilePath = PostFilePath String
   deriving (Show, Eq, Hashable, Binary, NFData)
 
 postNames :: Action [FilePath]
-postNames = getDirectoryFiles "." ["site/posts//*.md"]
+postNames = getDirectoryFiles "." ["site/posts//*.md", "site/drafts//*.md"]
 
 requirePosts :: Action ()
 requirePosts = do

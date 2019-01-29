@@ -57,9 +57,7 @@ data Term
     | Var Var
     | Lam Var Term
     | Pair Term Term
-    deriving (Show)
-    
-data Type
+    deriving (Show) data Type
     = TVar Var
     | TArrow Type Type
     | TPair Type Type
