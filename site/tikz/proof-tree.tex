@@ -1,0 +1,18 @@
+\documentclass[convert={density=300,size=300x300,outext=.png}]{standalone}
+\usepackage{tikz}
+
+\begin{document}
+\begin{tikzpicture}[level/.style={sibling distance=60mm/#1}]
+  \node{$A \Rightarrow B \Rightarrow A \land B$}
+    child{node{$A \vdash B \Rightarrow A \land B$}
+      child{node{$A, B \vdash A \land B$}
+        child{node{$A,B \vdash A$}}
+        child{node{$A,B \vdash B$}}
+      }
+    };
+\end{tikzpicture}
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

@@ -1,0 +1,31 @@
+<head>
+    <title>Tactic Metaprogramming in Haskell</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/syntax.css">
+    <script type="text/javascript"
+            src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+</head>
+<article>
+    <h1 id="tactical-haskell">Tactical Haskell</h1>
+<p>Let’s be entirely honest, metaprogramming is a really cool concept. Something about the idea of writing programs to create more programs just really tickles my fancy. The issues start to come in when you move from the idea stage to actually doing it. Template Haskell, though useful at times, seems to run counter to what exactly makes Haskell so elegant. There has to be a different way of doing things…</p>
+<p>Here’s a little hint of what is to come:</p>
+<pre><code>let tac = do
+  intro
+  x &lt;- intro
+  y &lt;- intro
+  intro &lt;..&gt; [use x, use y]
+in $(refine tac [t| forall a b. a -&gt; b -&gt; (a,b) ])</code></pre>
+<h2 id="a-different-way-of-doing-things">A Different Way of Doing Things</h2>
+<p>Many proof assistants have something called a <em>Tactic Language</em>, which is essentially a language of commands that describe how to create a term. Let’s see if we can’t make something like this in Haskell. We will be using the <a href="https://github.com/TOTBWF/refinery">Refinery</a> library, which provides a generic framework for doing refinement proofs.</p>
+<p>First things first, we are going to need to use Template Haskell to actually generate/splice the results of our tactics, as well as some bits from <code>Refinery</code>:</p>
+<pre><code>import Language.Haskell.TH
+import Refinery.MetaSubst
+import Refinery.Proof
+import Refinery.Telescope (Telescope(..), (@&gt;))
+import qualified Refinery.Telescope as Tl
+import Refinery.Tactic (tactic, subgoal, solve, many, &lt;..&gt;)
+import qualified Refinery.Tactic as T</code></pre>
+<p>Now for the 1st bit of our implementation. We are going to need some</p>
+<!-- Now, I know I said Template Haskell can be a bit clunky and inelegant at times, but it turns out that  -->
+</article>

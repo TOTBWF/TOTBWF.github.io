@@ -1,0 +1,14 @@
+\documentclass[convert={density=300,size=300x300,outext=.png}]{standalone}
+\usepackage{tikz}
+
+\begin{document}
+\begin{tikzpicture}[level/.style={sibling distance=60mm/#1}]
+  \node{$\lambda x. \lambda y. (x,y) :: a \rightarrow b \rightarrow a \times b$}
+    child{node{$\lambda y . (x,y) :: b \rightarrow a \times b$}
+      child{node{$(x,y) :: a \times b$}
+        child{node{$x :: a$}}
+        child{node{$y :: b$}}
+      }
+    };
+\end{tikzpicture}
+\end{document}
