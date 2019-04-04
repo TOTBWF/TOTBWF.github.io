@@ -1,31 +1,142 @@
 <head>
     <title>Tactic Metaprogramming in Haskell</title>
+    <meta charset="utf-8">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/syntax.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type="text/javascript"
             src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
     </script>
 </head>
 <article>
-    <h1 id="tactical-haskell">Tactical Haskell</h1>
-<p>Let’s be entirely honest, metaprogramming is a really cool concept. Something about the idea of writing programs to create more programs just really tickles my fancy. The issues start to come in when you move from the idea stage to actually doing it. Template Haskell, though useful at times, seems to run counter to what exactly makes Haskell so elegant. There has to be a different way of doing things…</p>
-<p>Here’s a little hint of what is to come:</p>
-<pre><code>let tac = do
-  intro
-  x &lt;- intro
-  y &lt;- intro
-  intro &lt;..&gt; [use x, use y]
-in $(refine tac [t| forall a b. a -&gt; b -&gt; (a,b) ])</code></pre>
-<h2 id="a-different-way-of-doing-things">A Different Way of Doing Things</h2>
-<p>Many proof assistants have something called a <em>Tactic Language</em>, which is essentially a language of commands that describe how to create a term. Let’s see if we can’t make something like this in Haskell. We will be using the <a href="https://github.com/TOTBWF/refinery">Refinery</a> library, which provides a generic framework for doing refinement proofs.</p>
-<p>First things first, we are going to need to use Template Haskell to actually generate/splice the results of our tactics, as well as some bits from <code>Refinery</code>:</p>
-<pre><code>import Language.Haskell.TH
-import Refinery.MetaSubst
-import Refinery.Proof
-import Refinery.Telescope (Telescope(..), (@&gt;))
-import qualified Refinery.Telescope as Tl
-import Refinery.Tactic (tactic, subgoal, solve, many, &lt;..&gt;)
-import qualified Refinery.Tactic as T</code></pre>
-<p>Now for the 1st bit of our implementation. We are going to need some</p>
-<!-- Now, I know I said Template Haskell can be a bit clunky and inelegant at times, but it turns out that  -->
+    <header>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/about.html">About</a>
+            <a href="/contact.html">Contact</a>
+        </nav>
+    </header>
+    <h1 id="type-directed-metaprogramming-in-haskell">Type-Directed Metaprogramming in Haskell</h1>
+<p>When I’m writing Haskell, quite often I come across type signatures that are just a mishmash of types. For example, take the definitely not made up function <code>foo</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="ot">foo ::</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c <span class="ot">-&gt;</span> (b, d <span class="ot">-&gt;</span> c)</a></code></pre></div>
+<p>My go-to strategy for filling out the implementation of a function like this is to just start by plopping down a hole, and refining down the solution. However, this process feels incredibly mechanical. Almost so mechanical that it could be programmed…</p>
+<p>Let’s try to give our mechanical process a type. First, we know it’s going to be a function that starts when given a type. After all, what is a process but a function?</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">type</span> <span class="dt">MechanicalProcess</span> goal <span class="fu">=</span> goal <span class="ot">-&gt;</span> <span class="fu">???</span></a></code></pre></div>
+<p>Next, we know that at some points, we are going to need to make some subgoals. For example, consider trying to fill in a hole <code>_h :: (a, b)</code>. The expression you create will look something like <code>(_h1 :: a, _h2 :: b)</code>, which obviously yields 2 subgoals.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">type</span> <span class="dt">MechanicalProcess</span> goal <span class="fu">=</span> goal <span class="ot">-&gt;</span> ([goal], <span class="fu">???</span>)</a></code></pre></div>
+<p>Now, what do we do with our solutions? Well, all we need is a way to map the solutions of all of the subgoals into a single solution. This gives us the final type:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">type</span> <span class="dt">MechanicalProcess</span> g solution <span class="fu">=</span> g <span class="ot">-&gt;</span> ([g], [solution] <span class="ot">-&gt;</span> solution)</a></code></pre></div>
+<p>Finally, <code>MechanicalProcess</code> is a <em>terrible</em> name, so lets give it a better one! Let’s call it a <code>Tactic</code>, because this seems essentially like a “tactic” for filling out implementations for types!</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">newtype</span> <span class="dt">Tactic</span> g s <span class="fu">=</span> <span class="dt">Tactic</span> {<span class="ot"> unTactic ::</span> g <span class="ot">-&gt;</span> ([g], [s] <span class="ot">-&gt;</span> s) }</a></code></pre></div>
+<h2 id="some-simple-tactics">Some Simple Tactics</h2>
+<p>From here on out, we will be using the <a href="https://github.com/TOTBWF/refinery">refinery</a> library, because our <code>Tactic</code> type has a few issues that make it not super friendly to work with. Don’t worry though, the <code>refinery</code> version of <code>Tactic</code> is morally equivalent, though it does have a few extra features. Let’s take a look at it.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">newtype</span> <span class="dt">TacticT</span> g s m a <span class="fu">=</span> <span class="fu">...</span></a></code></pre></div>
+<p>It still has the <code>goal</code> and <code>solution</code> type parameters, but now it’s been turned into a monad transformer! This lets us handle things like errors/environments/etc much easier. Also, the <code>a</code> parameter is pretty much just there to make the <code>Monad</code> gods happy, and is set to <code>()</code> all of the time.</p>
+<p>When discussing how to actually use these things, it will help to be able to look at actual, concrete examples. To do this, let’s define a super simple subset of Haskell so that we can all be on the same page.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">import</span> <span class="dt">Control.Monad.Except</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="kw">import</span> <span class="dt">Control.Monad.State</span></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="kw">import</span> <span class="dt">Data.List</span> (find)</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4"><span class="kw">import</span> <span class="dt">Refinery.Tactic</span></a>
+<a class="sourceLine" id="cb7-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb7-6" data-line-number="6"><span class="kw">type</span> <span class="dt">Var</span> <span class="fu">=</span> <span class="dt">String</span></a>
+<a class="sourceLine" id="cb7-7" data-line-number="7"><span class="kw">data</span> <span class="dt">Expr</span></a>
+<a class="sourceLine" id="cb7-8" data-line-number="8">    <span class="fu">=</span> <span class="dt">Var</span> <span class="dt">Var</span></a>
+<a class="sourceLine" id="cb7-9" data-line-number="9">    <span class="fu">|</span> <span class="dt">Hole</span>      <span class="co">-- ^ An incomplete expression</span></a>
+<a class="sourceLine" id="cb7-10" data-line-number="10">    <span class="fu">|</span> <span class="dt">Lambda</span> <span class="dt">Var</span> <span class="dt">Expr</span> </a>
+<a class="sourceLine" id="cb7-11" data-line-number="11">    <span class="fu">|</span> <span class="dt">App</span> <span class="dt">Expr</span> <span class="dt">Expr</span></a>
+<a class="sourceLine" id="cb7-12" data-line-number="12">    <span class="fu">|</span> <span class="dt">Pair</span> <span class="dt">Expr</span> <span class="dt">Expr</span></a>
+<a class="sourceLine" id="cb7-13" data-line-number="13">    <span class="fu">|</span> <span class="dt">ProjL</span> <span class="dt">Expr</span> <span class="co">-- ^ Equivalent to `fst`</span></a>
+<a class="sourceLine" id="cb7-14" data-line-number="14">    <span class="fu">|</span> <span class="dt">ProjR</span> <span class="dt">Expr</span> <span class="co">-- ^ Equivalent to `snd`</span></a>
+<a class="sourceLine" id="cb7-15" data-line-number="15">    <span class="kw">deriving</span> <span class="dt">Show</span></a>
+<a class="sourceLine" id="cb7-16" data-line-number="16">    </a>
+<a class="sourceLine" id="cb7-17" data-line-number="17"><span class="kw">data</span> <span class="dt">Type</span></a>
+<a class="sourceLine" id="cb7-18" data-line-number="18">    <span class="fu">=</span> <span class="dt">TVar</span> <span class="dt">Var</span></a>
+<a class="sourceLine" id="cb7-19" data-line-number="19">    <span class="fu">|</span> <span class="dt">Type</span> <span class="fu">:-&gt;</span> <span class="dt">Type</span> <span class="co">-- ^ Function type</span></a>
+<a class="sourceLine" id="cb7-20" data-line-number="20">    <span class="fu">|</span> <span class="dt">Type</span> <span class="fu">:*:</span> <span class="dt">Type</span> <span class="co">-- ^ Product/Pair type</span></a>
+<a class="sourceLine" id="cb7-21" data-line-number="21">    <span class="kw">deriving</span> (<span class="dt">Show</span>, <span class="dt">Eq</span>)</a>
+<a class="sourceLine" id="cb7-22" data-line-number="22"></a>
+<a class="sourceLine" id="cb7-23" data-line-number="23"><span class="kw">infixr</span> <span class="fu">:-&gt;</span></a>
+<a class="sourceLine" id="cb7-24" data-line-number="24">    </a>
+<a class="sourceLine" id="cb7-25" data-line-number="25"><span class="co">-- A Goal is a context containing variables bound to types, </span></a>
+<a class="sourceLine" id="cb7-26" data-line-number="26"><span class="co">-- along with a type that we are trying to fill.</span></a>
+<a class="sourceLine" id="cb7-27" data-line-number="27"><span class="kw">data</span> <span class="dt">Goal</span> <span class="fu">=</span> <span class="dt">Goal</span> [(<span class="dt">Var</span>, <span class="dt">Type</span>)] <span class="dt">Type</span></a>
+<a class="sourceLine" id="cb7-28" data-line-number="28">    <span class="kw">deriving</span> (<span class="dt">Show</span>)</a>
+<a class="sourceLine" id="cb7-29" data-line-number="29"></a>
+<a class="sourceLine" id="cb7-30" data-line-number="30"><span class="co">-- We are gonna need errors</span></a>
+<a class="sourceLine" id="cb7-31" data-line-number="31"><span class="kw">data</span> <span class="dt">TacticError</span></a>
+<a class="sourceLine" id="cb7-32" data-line-number="32">    <span class="fu">=</span> <span class="dt">GoalMismatch</span> <span class="dt">String</span> <span class="dt">Type</span></a>
+<a class="sourceLine" id="cb7-33" data-line-number="33">    <span class="fu">|</span> <span class="dt">UnsolvedSubgoals</span> [<span class="dt">Goal</span>]</a>
+<a class="sourceLine" id="cb7-34" data-line-number="34">    <span class="kw">deriving</span> (<span class="dt">Show</span>)</a>
+<a class="sourceLine" id="cb7-35" data-line-number="35"></a>
+<a class="sourceLine" id="cb7-36" data-line-number="36"><span class="kw">type</span> <span class="dt">Tactic</span> <span class="fu">=</span> <span class="dt">TacticT</span> <span class="dt">Goal</span> <span class="dt">Expr</span> (<span class="dt">StateT</span> <span class="dt">Int</span> (<span class="dt">Except</span> <span class="dt">TacticError</span>)) ()</a>
+<a class="sourceLine" id="cb7-37" data-line-number="37"><span class="co">-- To be discussed shortly</span></a>
+<a class="sourceLine" id="cb7-38" data-line-number="38"><span class="kw">type</span> <span class="dt">Rule</span> a <span class="fu">=</span> <span class="dt">RuleT</span> <span class="dt">Goal</span> <span class="dt">Expr</span> (<span class="dt">StateT</span> <span class="dt">Int</span> (<span class="dt">Except</span> <span class="dt">TacticError</span>)) a</a>
+<a class="sourceLine" id="cb7-39" data-line-number="39"></a>
+<a class="sourceLine" id="cb7-40" data-line-number="40"><span class="co">-- Create a fresh variable</span></a>
+<a class="sourceLine" id="cb7-41" data-line-number="41"><span class="ot">fresh ::</span> <span class="dt">Rule</span> <span class="dt">Var</span></a>
+<a class="sourceLine" id="cb7-42" data-line-number="42">fresh <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb7-43" data-line-number="43">    i <span class="ot">&lt;-</span> get</a>
+<a class="sourceLine" id="cb7-44" data-line-number="44">    modify (<span class="fu">+</span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb7-45" data-line-number="45">    return <span class="fu">$</span> <span class="st">&quot;x&quot;</span> <span class="fu">++</span> show i</a>
+<a class="sourceLine" id="cb7-46" data-line-number="46"></a>
+<a class="sourceLine" id="cb7-47" data-line-number="47"><span class="co">-- Sometimes, we need a monad to make holes, but in this case we don&#39;t</span></a>
+<a class="sourceLine" id="cb7-48" data-line-number="48"><span class="kw">instance</span> <span class="dt">MonadExtract</span> <span class="dt">Expr</span> <span class="dt">Identity</span> <span class="kw">where</span></a>
+<a class="sourceLine" id="cb7-49" data-line-number="49">  hole <span class="fu">=</span> return <span class="fu">$</span> <span class="dt">Hole</span></a>
+<a class="sourceLine" id="cb7-50" data-line-number="50"></a>
+<a class="sourceLine" id="cb7-51" data-line-number="51"><span class="ot">runTactic ::</span> <span class="dt">Type</span> <span class="ot">-&gt;</span> <span class="dt">Tactic</span> <span class="ot">-&gt;</span> <span class="dt">Either</span> <span class="dt">TacticError</span> <span class="dt">Expr</span></a>
+<a class="sourceLine" id="cb7-52" data-line-number="52">runTactic ty tac <span class="fu">=</span> runExcept <span class="fu">$</span> flip evalStateT <span class="dv">0</span> <span class="fu">$</span> runTacticT tac (<span class="dt">Goal</span> [] ty) <span class="fu">&gt;&gt;=</span> \<span class="kw">case</span></a>
+<a class="sourceLine" id="cb7-53" data-line-number="53">    (t, []) <span class="ot">-&gt;</span> return t</a>
+<a class="sourceLine" id="cb7-54" data-line-number="54">    (_, sg) <span class="ot">-&gt;</span> throwError <span class="fu">$</span> <span class="dt">UnsolvedSubgoals</span> sg</a></code></pre></div>
+<p>Now, lets define a few super simple <code>Tactic</code>s so that we can play around a bit! First, let’s implement the <code>pair</code> tactic that takes a goal of type <code>(a,b)</code> and yields 2 subgoals of type <code>a</code> and <code>b</code>. In <code>refinery</code>, we use the <code>rule</code> function to create these sort of domain-specific tactics. It’s type (when specialized to our case) is</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="ot">rule ::</span> <span class="dt">Goal</span> <span class="ot">-&gt;</span> <span class="dt">Rule</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Tactic</span></a></code></pre></div>
+<p>Now, here’s the implementation of <code>pair</code></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="ot">pair ::</span> <span class="dt">Tactic</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2">pair <span class="fu">=</span> rule <span class="fu">$</span> \(<span class="dt">Goal</span> ctx t) <span class="ot">-&gt;</span> <span class="kw">case</span> t <span class="kw">of</span></a>
+<a class="sourceLine" id="cb9-3" data-line-number="3">    (a <span class="fu">:*:</span> b) <span class="ot">-&gt;</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb9-4" data-line-number="4">        l <span class="ot">&lt;-</span> subgoal (<span class="dt">Goal</span> ctx a)</a>
+<a class="sourceLine" id="cb9-5" data-line-number="5">        r <span class="ot">&lt;-</span> subgoal (<span class="dt">Goal</span> ctx b)</a>
+<a class="sourceLine" id="cb9-6" data-line-number="6">        return <span class="fu">$</span> <span class="dt">Pair</span> l r</a>
+<a class="sourceLine" id="cb9-7" data-line-number="7">    t <span class="ot">-&gt;</span> throwError <span class="fu">$</span> <span class="dt">GoalMismatch</span> <span class="st">&quot;pair&quot;</span> t</a></code></pre></div>
+<p>Pretty straightforward, isn’t it! As an aside, all the <code>Rule/RuleT</code> portion of <code>rule</code> does is give us access to the <code>subgoal :: Goal -&gt; Rule Expr</code> function.</p>
+<p>As a slightly more complex example, heres the <code>function</code> tactic:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="ot">function ::</span> <span class="dt">Tactic</span></a>
+<a class="sourceLine" id="cb10-2" data-line-number="2">function <span class="fu">=</span> rule <span class="fu">$</span> \(<span class="dt">Goal</span> ctx t) <span class="ot">-&gt;</span> <span class="kw">case</span> t <span class="kw">of</span></a>
+<a class="sourceLine" id="cb10-3" data-line-number="3">    (a <span class="fu">:-&gt;</span> b) <span class="ot">-&gt;</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb10-4" data-line-number="4">        x <span class="ot">&lt;-</span> fresh</a>
+<a class="sourceLine" id="cb10-5" data-line-number="5">        body <span class="ot">&lt;-</span> subgoal (<span class="dt">Goal</span> ((x,a)<span class="fu">:</span>ctx) b)</a>
+<a class="sourceLine" id="cb10-6" data-line-number="6">        return <span class="fu">$</span> <span class="dt">Lambda</span> x body</a>
+<a class="sourceLine" id="cb10-7" data-line-number="7">    t <span class="ot">-&gt;</span> throwError <span class="fu">$</span> <span class="dt">GoalMismatch</span> <span class="st">&quot;function&quot;</span> t</a></code></pre></div>
+<p>This is also super simple! All this does is bind the fresh variable <code>x</code> to the type <code>a</code> in the context, and create a subgoal of type <code>b</code>.</p>
+<p>Now, for one last tactic: <code>assumption</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="ot">assumption ::</span> <span class="dt">Tactic</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2">assumption <span class="fu">=</span> rule <span class="fu">$</span> \(<span class="dt">Goal</span> ctx t) <span class="ot">-&gt;</span> <span class="kw">case</span> find ((<span class="fu">==</span> t) <span class="fu">.</span> snd) ctx <span class="kw">of</span></a>
+<a class="sourceLine" id="cb11-3" data-line-number="3">    <span class="dt">Just</span> (x, _) <span class="ot">-&gt;</span> return <span class="fu">$</span> <span class="dt">Var</span> x</a>
+<a class="sourceLine" id="cb11-4" data-line-number="4">    <span class="dt">Nothing</span> <span class="ot">-&gt;</span> throwError <span class="fu">$</span> <span class="dt">GoalMismatch</span> <span class="st">&quot;assumption&quot;</span> t</a></code></pre></div>
+<p>All <code>assumption</code> does is see if any tactic has put anything in the context that could match the goal, and if there is, it just creates an expression that references that variable, along with no new subgoals.</p>
+<h2 id="composing-tactics-and-tactic-combinators">Composing Tactics and Tactic Combinators</h2>
+<p>Now that we’ve got our simple tactics, we can start to stick them together! The simplest way to do this is to compose 2 <code>Tactic</code>s using <code>&gt;&gt;</code>. Doing so creates a new <code>Tactic</code> that uses the 2nd <code>Tactic</code> to solve the subgoals of the 1st. For example:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb12-1" data-line-number="1">pair <span class="fu">&gt;&gt;</span> pair</a></code></pre></div>
+<p>This will create a Tactic that, when presented with a goal of type <code>((a,b), (c,d))</code>, will create 4 subgoals <code>a</code>, <code>b</code>, <code>c</code>, and <code>d</code>.</p>
+<p>As useful as this is, what if we have a goal that looks like <code>((a,c), d -&gt; d)</code>? In this case, we can use:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="fu">&lt;@&gt;</span><span class="ot"> ::</span> <span class="dt">Tactic</span> <span class="ot">-&gt;</span> [<span class="dt">Tactic</span>] <span class="ot">-&gt;</span> <span class="dt">Tactic</span></a></code></pre></div>
+<p>This combinator takes a tactic, and a list of tactics to apply to the subgoals in order. In our example, the tactic we want would be:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb14-1" data-line-number="1">pair <span class="fu">&lt;@&gt;</span> [pair, function]</a></code></pre></div>
+<p>Now, this is great and all, but we’ve just traded in 1 way to write programs for a slightly more complicated way to write programs. What we really want is some tactic <code>auto</code> that can just solve our problems for us. To accomplish this, we are going to need to introduct 1 more combinator:</p>
+<pre><code>&lt;!&gt; :: Tactic -&gt; Tactic -&gt; Tactic</code></pre>
+<p>This combinator will try to run the 1st tactic, and, if it fails, will run the 2nd tactic. With this power, we can finally write our <code>auto</code> tactic:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="ot">auto ::</span> <span class="dt">Tactic</span></a>
+<a class="sourceLine" id="cb16-2" data-line-number="2">auto <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb16-3" data-line-number="3">  function <span class="fu">&lt;!&gt;</span> pair <span class="fu">&lt;!&gt;</span> assumption</a>
+<a class="sourceLine" id="cb16-4" data-line-number="4">  auto</a></code></pre></div>
+<p>That’s all there is to it! Let’s try it out on our function <code>foo</code> from the very beginning!</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb17-1" data-line-number="1">λ runTactic (<span class="dt">TVar</span> <span class="st">&quot;a&quot;</span> <span class="fu">:-&gt;</span> <span class="dt">TVar</span> <span class="st">&quot;b&quot;</span> <span class="fu">:-&gt;</span> <span class="dt">TVar</span> <span class="st">&quot;c&quot;</span> <span class="fu">:-&gt;</span> (<span class="dt">TVar</span> <span class="st">&quot;b&quot;</span> <span class="fu">:*:</span> (<span class="dt">TVar</span> <span class="st">&quot;d&quot;</span> <span class="fu">:-&gt;</span></a>
+<a class="sourceLine" id="cb17-2" data-line-number="2"><span class="dt">TVar</span> <span class="st">&quot;c&quot;</span>))) auto</a>
+<a class="sourceLine" id="cb17-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb17-4" data-line-number="4"><span class="dt">Right</span> (<span class="dt">Lambda</span> <span class="st">&quot;x0&quot;</span> (<span class="dt">Lambda</span> <span class="st">&quot;x1&quot;</span> (<span class="dt">Lambda</span> <span class="st">&quot;x2&quot;</span> (<span class="dt">Pair</span> (<span class="dt">Var</span> <span class="st">&quot;x1&quot;</span>) (<span class="dt">Lambda</span> <span class="st">&quot;x3&quot;</span> (<span class="dt">Var</span> <span class="st">&quot;x2&quot;</span>))))))</a></code></pre></div>
+<p>Prettying that up a bit, we can see that <code>\x0 x1 x2 -&gt; (x1, \x3 -&gt; x2)</code> really does have the type we want!</p>
+<h2 id="extending-the-horizons">Extending The Horizons</h2>
+<p>Obviously, there is a ton more work required to make this fully general. However, I’ve started that work in <a href="https://github.com/TOTBWF/tactic-haskell">tactic-haskell</a>, which uses this approach to work with actual Haskell types, and to generate actual Haskell code. In the future, I plan on writing a bit on the actual guts of <a href="https://github.com/TOTBWF/refinery">refinery</a> itself, and perhaps a tutorial on <a href="https://github.com/TOTBWF/tactic-haskell">tactic-haskell</a> itself once it matures a bit more. Until then, happy hacking!</p>
+    <footer>
+        Site made with Haskell and
+        <a href="https://github.com/ChrisPenner/Slick">Slick</a>
 </article>

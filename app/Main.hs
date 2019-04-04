@@ -29,6 +29,7 @@ import Development.Shake.FilePath
 import GHC.Generics (Generic)
 import Slick
 
+import System.Environment (getArgs)
 import qualified System.FSNotify as Notify
 import Control.Concurrent (threadDelay, forkIO)
 import Control.Monad (forever)
@@ -40,6 +41,7 @@ import qualified Network.Wai.Application.Static as Static
 
 main :: IO ()
 main = do
+  runBuild
   forkIO fileWatcher
   previewServer
 
@@ -61,7 +63,14 @@ runBuild = shakeArgs shakeOptions { shakeVerbosity = Chatty } $
     want ["site"]
     postCache <- jsonCache' loadPost
     -- Require all the things we need to build the whole site
-    "site" ~> need ["static", "posts", "tikz", "dist/index.html"]
+    "site" ~> need
+      ["static"
+      , "posts"
+      , "tikz"
+      , "dist/index.html"
+      , "dist/about.html"
+      , "dist/contact.html"
+      ]
     -- Require all static assets
     "static" ~> do
       staticFiles <- getDirectoryFiles "." ["site/js//*", "site/images//*"]
@@ -78,8 +87,10 @@ runBuild = shakeArgs shakeOptions { shakeVerbosity = Chatty } $
     "dist/css/syntax.css" %> buildSyntaxCss
     -- build the main table of contents
     "dist/index.html" %> buildIndex postCache
+    "dist/about.html" %> buildTemplate
+    "dist/contact.html" %> buildTemplate
     -- rule for actually building posts
-    "dist/drafts//*.html" %> buildPost postCache
+    -- "dist/drafts//*.html" %> buildPost postCache
     "dist/posts//*.html" %> buildPost postCache
     -- rule for actually building tikz images
     "dist/tikz//*.png" %> buildTikz
@@ -102,6 +113,12 @@ data IndexInfo = IndexInfo
 instance FromJSON IndexInfo
 
 instance ToJSON IndexInfo
+
+buildTemplate :: FilePath -> Action ()
+buildTemplate out = do
+  let src = "site" </> "templates" </> dropDirectory1 out
+  templateT <- compileTemplate' src
+  writeFile' out $ T.unpack $ substitute templateT ()
 
 buildIndex :: (PostFilePath -> Action Post) -> FilePath -> Action ()
 buildIndex postCache out = do
@@ -142,7 +159,7 @@ newtype PostFilePath = PostFilePath String
   deriving (Show, Eq, Hashable, Binary, NFData)
 
 postNames :: Action [FilePath]
-postNames = getDirectoryFiles "." ["site/posts//*.md", "site/drafts//*.md"]
+postNames = getDirectoryFiles "." ["site/posts//*.md"]
 
 requirePosts :: Action ()
 requirePosts = do

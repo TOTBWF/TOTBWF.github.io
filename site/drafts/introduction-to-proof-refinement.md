@@ -76,4 +76,4 @@ data Judgement = Judgement [(Var, Type)] Type
   deriving (Show)
 ```
 
-Now, on to the core type of `refinery`, `TacticT goal extract m a`.
+<!-- Now, on to the core type of `refinery`, `TacticT goal extract m a`. -->
