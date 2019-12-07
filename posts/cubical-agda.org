@@ -1,0 +1,499 @@
+#+TITLE: Reading Cubical Agda
+
+# First, let's bootstrap three.js so that we can have fancy animations.
+#+BEGIN_EXPORT html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/109/three.js"></script>
+<script src="../js/CSS2DRenderer.js"></script>
+<script src="../js/OrbitalControls.js"></script>
+<style>
+  .view {
+    width: 7in;
+    height: 7in;
+    margin: auto;
+  }
+  #c {
+    position: fixed;
+    left: 0px; top: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    z-index: -1;
+  }
+  .label {
+    color: #000;
+    padding: 2px;
+    background: transparent;
+  }
+</style>
+
+<canvas id="c"></canvas>
+#+END_EXPORT
+
+#+BEGIN_SRC inline-js
+  var scenes = [], views, t, canvas, renderer, labelRenderer;
+  window.onload = init;
+
+  function init() {
+      canvas = document.getElementById( 'c' );
+
+      renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
+      labelRenderer = new THREE.CSS2DRenderer();
+      renderer.setPixelRatio( window.devicePixelRatio );
+
+      views = document.querySelectorAll( '.view' );
+      for ( var n = 0; n < views.length; n++ ) {
+
+          labelRenderer.domElement.style.position = 'absolute';
+          views[n].appendChild( labelRenderer.domElement );
+
+          let scene = new THREE.Scene();
+          scene.background = new THREE.Color( 0xffffff );
+          scene.userData.view = views[ n ];
+
+          let geometry = new THREE.BoxGeometry(2, 2, 2);
+          let edges = new THREE.EdgesGeometry(geometry);
+          let material = new THREE.MeshBasicMaterial({ color: 0x222222 });
+          let cube = new THREE.LineSegments(edges, material);
+
+          scene.add(cube);
+
+          var camera = new THREE.PerspectiveCamera( 75, 1, 0.1, 100 );
+          camera.position.set( 0, 0, 3 );
+          scene.userData.camera = camera;
+          scene.userData.geometry = geometry;
+          scene.userData.cube = cube;
+
+          let makeLabel = (label) => {
+              var labelDiv = document.createElement( 'div' );
+              labelDiv.className = 'label';
+              labelDiv.textContent = label;
+              labelDiv.style.color = 0x000000;
+              labelDiv.style.marginTop = '-1em';
+              return new THREE.CSS2DObject( labelDiv );
+          }
+
+          let edgeLabels = [
+              //////////////////////////////////
+              { label: "",        k: 1, j: 0 },
+              { label: "", k: 1, j: 1 },
+              { label: "𝓓.identityʳ j ∘ F₁ f",     k: 1, i: 0 },
+              { label: "G₁ f ∘ 𝓓.identityʳ j",     k: 1, i: 1 },
+              // ///////////////////////////////
+              { label: "pullᵣ id.commute f",       k: 0, j: 0 },
+              { label: "",     k: 0, j: 1 },
+              { label: "refl",     k: 0, i: 0 },
+              { label: "",     k: 0, i: 1 },
+              // ///////////////////////////////
+              { label: "refl",     i: 0, j: 0 },
+              { label: "𝓓.identityʳ k ∘ F₁ f",     i: 0, j: 1 },
+              // ///////////////////////////////
+              { label: "pullˡ (τ.commute f) ∙ 𝓓.assoc",        i: 1, j: 0 },
+              { label: "",        i: 1, j: 1 },
+          ]
+
+          for (var l = 0; l < edgeLabels.length; l++) {
+              let label = makeLabel(edgeLabels[l].label);
+              cube.add(label);
+
+              let axis = (key) => {
+                  let v = edgeLabels[l][key]
+                  if (v === 1) {
+                      return 1;
+                  } else if (v === 0) {
+                      return -1;
+                  } else {
+                      return 0;
+                  }
+              }
+              label.position.set(axis('i'), axis('k'), axis('j'));
+          }
+
+          let vertexLabels = [
+              ////////////////////////////////
+              { label: "(η Y ∘ id) ∘ F₁ f", k: 1, j: 0, i: 0 },
+              { label: "G₁ f ∘ (η X ∘ id)", k: 1, j: 0, i: 1 },
+              { label: "η Y ∘ F₁ f", k: 1, j: 1, i: 0 },
+              { label: "G₁ f ∘ η X", k: 1, j: 1, i: 1 },
+              ////////////////////////////////
+              { label: "(η Y ∘ id) ∘ F₁ f", k: 0, j: 0, i: 0 },
+              { label: "(η Y ∘ id) ∘ F₁ f", k: 0, j: 1, i: 0 },
+              { label: "η Y ∘ (id ∘ F₁ f)", k: 0, j: 0, i: 1 },
+              { label: "", k: 0, j: 1, i: 1 },
+              ////////////////////////////////
+          ]
+
+          for (var v = 0; v < vertexLabels.length; v++) {
+              let vertex = vertexLabels[v]
+              let label = makeLabel(vertex.label);
+
+              let axis = (key) => vertex[key] === 0 ? -1 : 1;
+
+              cube.add(label);
+              label.position.set(axis('i'), axis('k'), axis('j'));
+          }
+
+          var controls = new THREE.OrbitControls( camera, views[ n ] );
+          scene.userData.controls = controls;
+
+          var axesHelper = new THREE.AxesHelper( 0.5 );
+          scene.add( axesHelper );
+
+          scenes.push( scene );
+      }
+      animate();
+  }
+
+
+
+  function updateSize() {
+      var width = canvas.clientWidth;
+      var height = canvas.clientHeight;
+      if ( canvas.width !== width || canvas.height != height ) {
+          renderer.setSize(width, height, false);
+      }
+  }
+
+  function animate() {
+      render();
+      for (var n = 0; n < scenes.length; n++) {
+          var scene = scenes[n];
+          var cube = scene.userData.cube;
+
+          // cube.rotation.x += 0.005;
+          // cube.rotation.y += 0.001;
+
+      }
+      requestAnimationFrame(animate);
+  }
+
+  function render() {
+      updateSize();
+      renderer.setClearColor( 0xffffff );
+      renderer.setScissorTest( false );
+      renderer.clear();
+      renderer.setClearColor( 0x000000 );
+      renderer.setScissorTest( true );
+      for (var n = 0; n < scenes.length; n++) {
+          var scene = scenes[n]
+
+          var rect = scene.userData.view.getBoundingClientRect();
+          // check if it's offscreen. If so skip it
+          if ( rect.bottom < 0 || rect.top > renderer.domElement.clientHeight ||
+               rect.right < 0 || rect.left > renderer.domElement.clientWidth ) {
+              return; // it's off screen
+          }
+          // set the viewport
+          var width = rect.right - rect.left;
+          var height = rect.bottom - rect.top;
+          var left = rect.left;
+          var bottom = renderer.domElement.clientHeight - rect.bottom;
+          renderer.setViewport( left, bottom, width, height );
+          renderer.setScissor( left, bottom, width, height );
+
+          labelRenderer.setSize(width, height);
+
+          renderer.render( scene, scene.userData.camera );
+          labelRenderer.render( scene, scene.userData.camera );
+          // labelRenderer.domElement.style.top = rect.bottom + 'px';
+      }
+  }
+
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_EXPORT html
+<script type="text/javascript">
+var scenes = [], views, t, canvas, renderer, labelRenderer;
+window.onload = init;
+
+function init() {
+    canvas = document.getElementById( 'c' );
+
+    renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
+    labelRenderer = new THREE.CSS2DRenderer();
+    renderer.setPixelRatio( window.devicePixelRatio );
+
+    views = document.querySelectorAll( '.view' );
+    for ( var n = 0; n < views.length; n++ ) {
+
+        labelRenderer.domElement.style.position = 'absolute';
+        views[n].appendChild( labelRenderer.domElement );
+
+        let scene = new THREE.Scene();
+        scene.background = new THREE.Color( 0xffffff );
+        scene.userData.view = views[ n ];
+
+        let geometry = new THREE.BoxGeometry(2, 2, 2);
+        let edges = new THREE.EdgesGeometry(geometry);
+        let material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        let cube = new THREE.LineSegments(edges, material);
+
+        scene.add(cube);
+
+        var camera = new THREE.PerspectiveCamera( 75, 1, 0.1, 100 );
+        camera.position.set( 0, 0, 3 );
+        scene.userData.camera = camera;
+        scene.userData.geometry = geometry;
+        scene.userData.cube = cube;
+
+
+        // let labels = [
+        //     /////////////////////////////
+        //     "p",        // (k = 1, j = 0)
+        //     "refl ∙ p", // (k = 1, j = 1)
+        //     "refl",     // (k = 1, i = 0)
+        //     "?",        // (k = 1, i = 1)
+        //     /////////////////////////////
+        //     "p",        // (k = 0, j = 0)
+        //     "refl",     // (k = 0, j = 1)
+        //     "refl",     // (k = 0, i = 0)
+        //     "p",        // (k = 0, i = 1)
+        //     /////////////////////////////
+        //     "refl",     // (i = 0, j = 0)
+        //     "refl",     // (i = 0, j = 1)
+        //     /////////////////////////////
+        //     "?",        // (i = 1, j = 0)
+        //     "p",        // (i = 1, j = 1)
+        //     /////////////////////////////
+        // ]
+
+        let labels = [
+            { label: "p",        k: 1, j: 0 },
+            { label: "refl ∙ p", k: 1, j: 1 },
+            { label: "refl",     k: 1, i: 0 },
+            { label: "p",        k: 0, j: 0 },
+            { label: "refl",     k: 0, j: 1 },
+            { label: "refl",     k: 0, i: 0 },
+        ]
+
+        for (var l = 0; l < labels.length; l++) {
+            var labelDiv = document.createElement( 'div' );
+            labelDiv.className = 'label';
+            labelDiv.textContent = labels[l].label;
+            labelDiv.style.color = 0x000000;
+            labelDiv.style.marginTop = '-1em';
+            var label = new THREE.CSS2DObject( labelDiv );
+            cube.add(label);
+            let axis = (key) => {
+                let v = labels[l][key]
+                if (v === 1) {
+                    return 1;
+                } else if (v === 0) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+            label.position.set(axis('i'), axis('k'), -1 * axis('j'));
+        }
+
+        scenes.push( scene );
+    }
+    animate();
+}
+
+
+
+function updateSize() {
+    var width = canvas.clientWidth;
+    var height = canvas.clientHeight;
+    if ( canvas.width !== width || canvas.height != height ) {
+        renderer.setSize(width, height, false);
+    }
+}
+
+function animate() {
+    render();
+    for (var n = 0; n < scenes.length; n++) {
+        var scene = scenes[n];
+        // var camera = scene.userData.camera;
+        var geometry = scene.userData.geometry;
+        var cube = scene.userData.cube;
+        // var geometry = scene.userData.geometry;
+        // var labels = scene.userData.labels;
+
+        // cube.rotation.x += 0.01;
+        // cube.rotation.y += 0.01;
+
+        // for (var i = 0; i < labels.length; i++) {
+        //     let label = labels[i];
+        //     let coords = project2D(camera, cube.localToWorld(geometry.vertices[i].clone()))
+        //     label.style.left = coords.x + "px";
+        //     label.style.top = coords.y + "px";
+        // }
+    }
+    requestAnimationFrame(animate);
+}
+
+function render() {
+    updateSize();
+    renderer.setClearColor( 0xffffff );
+    renderer.setScissorTest( false );
+    renderer.clear();
+    renderer.setClearColor( 0x000000 );
+    renderer.setScissorTest( true );
+    for (var n = 0; n < scenes.length; n++) {
+        var scene = scenes[n]
+
+        var rect = scene.userData.view.getBoundingClientRect();
+        // check if it's offscreen. If so skip it
+        if ( rect.bottom < 0 || rect.top > renderer.domElement.clientHeight ||
+             rect.right < 0 || rect.left > renderer.domElement.clientWidth ) {
+            return; // it's off screen
+        }
+        // set the viewport
+        var width = rect.right - rect.left;
+        var height = rect.bottom - rect.top;
+        var left = rect.left;
+        var bottom = renderer.domElement.clientHeight - rect.bottom;
+        renderer.setViewport( left, bottom, width, height );
+        renderer.setScissor( left, bottom, width, height );
+
+        labelRenderer.setSize(width, height);
+
+        renderer.render( scene, scene.userData.camera );
+        labelRenderer.render( scene, scene.userData.camera );
+        // labelRenderer.domElement.style.top = rect.bottom + 'px';
+    }
+}
+
+</script>
+#+END_EXPORT
+
+* Introduction
+  For the past few months, I've been playing with [[https://agda.readthedocs.io/en/v2.6.0.1/language/cubical.html][Cubical Agda]], which
+  brings Cubical Type Theory into Agda. This lets us play around with
+  Homotopy Type Theory, and gives it computational meaning! So far, it's
+  been super fun, but there have been a few things that I found rather
+  confusing at first. This blog post is an attempt at sharing what I've
+  learned so far.
+
+  To begin using cubical agda, you can simply add
+  ~{-# OPTIONS --cubical #-}~ to the top of the file, but that only
+  gives us the basic primitives we need. Most of the time, you are going
+  to want to use the excellent library [[https://github.com/agda/cubical][cubical]], which provides us a more
+  fleshed out series of definitions, along with a bunch of handy proofs.
+
+  Now, let's get a high level overview of what Cubical Agda is all about.
+
+* Motiviation
+  The motivation behind Cubical Agda is that dealing with equality
+  can be /very/ tricky in regular Agda. The most obvious example is
+  function extensionality:
+  #+BEGIN_SRC agda2
+    funExt : ∀ (f g : A → B) → (∀ x. f x ≡ g x) → f ≡ g
+  #+END_SRC
+  
+  In other words, if two functions behave the same on all possible
+  inputs, then we should be able to prove that these two functions are equivalent.
+  This is impossible to prove in regular agda without the use of
+  postulates, which is obviously not great.
+
+  The issue stems from how Agda defines equality:
+  #+BEGIN_SRC agda2
+    data _≡_ {A : Set} (x : A) : A → Set where
+      refl : x ≡ x
+  #+END_SRC
+  
+  In essence, two things are equal if and only if they are _exactly_
+  the same. This means that even if two things /behave/ exactly the
+  same, we can't say that the are equal!
+  
+  The problems don't stop with function extensionality. Because
+  there is only one way to prove equality, this means that all
+  equality proofs are themselves equivalent. This is no good either!
+  Why should we insist on proof relevance for everything, but then
+  have proof-irrelevant equality proofs?
+
+* Paths
+  The solution to these problems comes with the realization that
+  equality proofs in a type behave like paths in a space. I won't go
+  too into depth on this idea, because a bunch of folks much smarter
+  than me [[https://homotopytypetheory.org/book/][wrote a whole book]] on this topic, but here's the basic gist:
+  - Equality is transitive. If ~x ≡ y~, and ~y ≡ z~, then it better be
+    true that ~x ≡ z~. This is the same for paths! If you can draw a
+    path from a point ~x~ to a point ~y~, and you can draw a path from ~y~
+    to ~z~, then you can draw a path from ~x~ to ~z~!
+  - Equality is symmetric. If ~x ≡ y~, then ~y ≡ x~. Similarly, if you
+    can draw a path from ~x~ to ~y~, then you can draw a path from ~y~
+    to ~x~.
+  - Equality is reflexive. For every ~x~, ~x ≡ x~. For paths, you can
+    always draw a path from a point to itself.
+
+  Now that we've got that out of the way, let's look at how Cubical
+  Agda defines paths.
+
+  First, we start with a type ~I~, which represents an interval
+  ~[0,1]~ on the real line. A term ~i : I~ can then be considered a
+  point on that interval. Furthermore, this interval has two endpoints:
+  #+BEGIN_SRC agda2
+    i0 : I
+    i1 : I
+  #+END_SRC
+  These correspond to the points ~0~ and ~1~, respectively.
+
+  A path (which is also a proof of equality) is morally[fn:1] a function from
+  ~I → A~. For example, a proof that ~x ≡ y~ is a function ~p : I → A~ where
+  ~p i0 = x~ and ~p i1 = y~. This confused me at first, but it helps to
+  remember that ~I~ is supposed to be /continuous/. To help make this
+  more concrete, here's a picture of what is going on:
+
+  #+HEADER: :file ./path.svg :imagemagick yes
+  #+HEADER: :results silent output
+  #+HEADER: :fit no :imoutoptions -geometry 100 :iminoptions -density 200
+  #+BEGIN_SRC latex
+    \begin{tikzpicture}
+      \draw[-] (0,0) -- (0,1);
+      \node[label=left:{I}] (I) at (0,1/2) {};
+      \node[circle,fill=black,inner sep=0pt,minimum size=2pt,label=left:{i0}] (i0) at (0,0) {};
+      \node[circle,fill=black,inner sep=0pt,minimum size=2pt,label=left:{i1}] (i1) at (0,1) {};
+      \draw (1,0.5) ellipse (0.5 and 1.5) node[right] {A};
+      \node[circle,fill=black,inner sep=0pt,minimum size=2pt,label=right:{x}] (x) at (7/8,5/4) {};
+      \node[circle,fill=black,inner sep=0pt,minimum size=2pt,label=right:{y}] (y) at (7/8,-1/4) {};
+      \draw[dotted] (x) -- (y);
+      \draw[->] (1/4, 0) -- (6/8, -1/4);
+      \draw[->] (1/4, 1/4) -- (6/8, 1/8);
+      \draw[->] (1/4, 1/2) -- (6/8, 1/2);
+      \draw[->] (1/4, 3/4) -- (6/8, 7/8);
+      \draw[->] (1/4, 1) -- (6/8, 5/4);
+    \end{tikzpicture}
+  #+END_SRC
+
+  #+ATTR_HTML: :width 200px
+  #+ATTR_HTML: :height 200px
+  [[./path.svg]]
+
+  Keeping this in the back of our mind, let's define our first path:
+  the identity path.
+  #+BEGIN_SRC agda2
+    refl : ∀ {ℓ} {A : Set ℓ} {x : A} → x ≡ x
+    refl {x = x} = λ (i : I) → x
+  #+END_SRC
+  This path has both endpoints at ~x~, and has no exciting
+  behavior. It just stays where it is, no matter the input.
+** TODO Finish the rest of this section
+* TODO Composition
+* TODO Kan Filling
+  ~f : X → Y~
+
+  ~η X : F₀ X → G₀ X~
+
+  ~η Y : F₀ Y → G₀ Y~
+
+  ~𝓓.identityʳ f : f ∘ id ≡ f~
+
+  ~pullˡ (𝓓.identityʳ )~
+  #+BEGIN_EXPORT html
+  <div class="view">
+    <script>
+      // var parent = document.scripts[ document.scripts.length - 1 ].parentNode;
+      // parent.displacement = function ( x, y, z, t, target ) {
+      //   return target.set( Math.sin( x - t ), 0, 0 );
+      // };
+      // parent.lattice = true;
+    </script>
+  </div>
+  #+END_EXPORT
+* Footnotes
+[fn:1] Paths aren't _truly_ functions (see [[https://agda.readthedocs.io/en/v2.6.0.1/language/cubical.html#the-interval-and-path-types][this]]),
+  but for our purposes we can think of them as such
