@@ -1,0 +1,848 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-02-07 Sun 11:04 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Reed Mullanix" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="content">
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org3022a23">1. Introduction</a></li>
+<li><a href="#orga5869d6">2. Pantry</a>
+<ul>
+<li><a href="#org6c22923">2.1. Dashi</a></li>
+</ul>
+</li>
+<li><a href="#org9b399f7">3. Snacks</a>
+<ul>
+<li><a href="#org811a364">3.1. Sourdough Starter Scallion Pancakes</a></li>
+</ul>
+</li>
+<li><a href="#orgc67557d">4. Lunch</a>
+<ul>
+<li><a href="#orgd74d30d">4.1. Chickpea Wraps</a></li>
+</ul>
+</li>
+<li><a href="#org169026e">5. Dinner</a>
+<ul>
+<li><a href="#orgc14c3d7">5.1. Chickpeas and Orzo</a></li>
+<li><a href="#org7d5e644">5.2. Korean Rice Bowls</a></li>
+<li><a href="#orga28db57">5.3. Sesame Noodles</a></li>
+<li><a href="#org8dcc556">5.4. Chicken Paprikish</a></li>
+<li><a href="#org905ca14">5.5. Oyakodon</a></li>
+</ul>
+</li>
+<li><a href="#org3923ca2">6. Baking</a>
+<ul>
+<li><a href="#org7db56bd">6.1. Overnight White Bread</a></li>
+<li><a href="#org9e89eba">6.2. Sourdough Starter</a></li>
+<li><a href="#org780ee2b">6.3. Japanese Milk Bread</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org3022a23" class="outline-2">
+<h2 id="org3022a23"><span class="section-number-2">1</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+For Eliot, Merry Christmas! This page will be continuously updated, so
+check back in every once and a while! A PDF version is also available <a href="recipes.pdf">here</a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga5869d6" class="outline-2">
+<h2 id="orga5869d6"><span class="section-number-2">2</span> Pantry</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org6c22923" class="outline-3">
+<h3 id="org6c22923"><span class="section-number-3">2.1</span> Dashi</h3>
+<div class="outline-text-3" id="text-2-1">
+</div>
+<div id="outline-container-orgd30ca63" class="outline-4">
+<h4 id="orgd30ca63"><span class="section-number-4">2.1.1</span> Ingredients</h4>
+<div class="outline-text-4" id="text-2-1-1">
+<ul class="org-ul">
+<li>30 grams dried Kombu</li>
+<li>30 grams bonito flakes</li>
+<li>2 Liters water</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgd9534f9" class="outline-4">
+<h4 id="orgd9534f9"><span class="section-number-4">2.1.2</span> Instructions</h4>
+<div class="outline-text-4" id="text-2-1-2">
+<p>
+Combine water and kombu in a saucepan, and bring to a simmer over
+medium heat. Remove from the heat, then add in the bonito flakes,
+and let sit for 5 minutes. Strian off the kombu and bonito and
+discard. The resulting stock can be stored in the fridge for up to
+a week.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org9b399f7" class="outline-2">
+<h2 id="org9b399f7"><span class="section-number-2">3</span> Snacks</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org811a364" class="outline-3">
+<h3 id="org811a364"><span class="section-number-3">3.1</span> Sourdough Starter Scallion Pancakes</h3>
+<div class="outline-text-3" id="text-3-1">
+<ul class="org-ul">
+<li>Leftover sourdough starter</li>
+<li>Scallions</li>
+<li>Sesame Oil</li>
+<li>Salt</li>
+</ul>
+</div>
+<div id="outline-container-orgbf22cae" class="outline-4">
+<h4 id="orgbf22cae"><span class="section-number-4">3.1.1</span> Instructions</h4>
+<div class="outline-text-4" id="text-3-1-1">
+<p>
+Dice scallions, and add to leftover starter and mix to form a
+batter. Heat a pan on medium heat, and pour batter down to form
+pancakes. Cook as you would a pancake.
+</p>
+
+<p>
+In a small bowl, mix together a bit of sesame oil and salt.
+To serve, dip the pancakes in the sauce.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc67557d" class="outline-2">
+<h2 id="orgc67557d"><span class="section-number-2">4</span> Lunch</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-orgd74d30d" class="outline-3">
+<h3 id="orgd74d30d"><span class="section-number-3">4.1</span> Chickpea Wraps</h3>
+<div class="outline-text-3" id="text-4-1">
+</div>
+<div id="outline-container-org54ca80e" class="outline-4">
+<h4 id="org54ca80e"><span class="section-number-4">4.1.1</span> Ingredients</h4>
+<div class="outline-text-4" id="text-4-1-1">
+<ul class="org-ul">
+<li>1 can chickpeas (15 oz)</li>
+<li>Mayonnaise (1/3 cup)</li>
+<li>Sriracha (1.5 Tbsp)</li>
+<li>Cilantro (2 Tbsp)</li>
+<li>Lemon Juice (1 Tsp)</li>
+<li>Salt (1/8 Tsp)</li>
+<li>Large Flour Tortillas (2)</li>
+<li>Spinach (2 Cups)</li>
+<li>Carrot (1)</li>
+<li>Bell Pepper (1/2)</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgba4d5e7" class="outline-4">
+<h4 id="orgba4d5e7"><span class="section-number-4">4.1.2</span> Prep</h4>
+<div class="outline-text-4" id="text-4-1-2">
+<ul class="org-ul">
+<li>Drain chickpeas</li>
+<li>Thinly dice carrot into strips</li>
+<li>Cut bell pepper into strips</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org8dacb6f" class="outline-4">
+<h4 id="org8dacb6f"><span class="section-number-4">4.1.3</span> Instructions</h4>
+<div class="outline-text-4" id="text-4-1-3">
+<p>
+Add drained chickpeas then add them to a bowl with the mayonnaise,
+sriracha, cilantro, lemon juice, and salt. (You may want to start
+with less sriracha and add more to taste if you are sensitive to
+heat). Mash the chickpeas until they are fairly broken down and
+the dressing ingredients have combined.
+</p>
+
+<p>
+To build the wraps, place the tortillas on a work surface and add
+half of the spinach, carrot sticks, bell pepper, and sriracha
+chickpea salad to each one. Fold the sides in toward the center,
+then roll from the bottom up, like a burrito. Serve immediately or
+refrigerate until ready to eat.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org169026e" class="outline-2">
+<h2 id="org169026e"><span class="section-number-2">5</span> Dinner</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-orgc14c3d7" class="outline-3">
+<h3 id="orgc14c3d7"><span class="section-number-3">5.1</span> Chickpeas and Orzo</h3>
+<div class="outline-text-3" id="text-5-1">
+</div>
+<div id="outline-container-org3625b7f" class="outline-4">
+<h4 id="org3625b7f"><span class="section-number-4">5.1.1</span> Ingredients</h4>
+<div class="outline-text-4" id="text-5-1-1">
+<ul class="org-ul">
+<li>1 can chickpeas (15oz)</li>
+<li>Orzo (2 servings)</li>
+<li>Shallot (2)</li>
+<li>Italian Parsley (5 sprigs)</li>
+<li>Feta Cheese</li>
+<li>Olive Oil</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgabd0798" class="outline-4">
+<h4 id="orgabd0798"><span class="section-number-4">5.1.2</span> Prep</h4>
+<div class="outline-text-4" id="text-5-1-2">
+<ul class="org-ul">
+<li>Dice Parsley</li>
+<li>Crumble feta cheese</li>
+<li>Drain and rinse chickpeas</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org88560d4" class="outline-4">
+<h4 id="org88560d4"><span class="section-number-4">5.1.3</span> Instructions</h4>
+<div class="outline-text-4" id="text-5-1-3">
+<p>
+Boil water, salt, and cook orzo.
+</p>
+
+<p>
+Saute the shallots until they are translucent and begin
+to brown. Then, add the chickpeas and stir, until they are warmed.
+Then, add the orzo and mix. Remove from heat, and add feta cheese
+to taste. Sprinkle with diced parsley.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org7d5e644" class="outline-3">
+<h3 id="org7d5e644"><span class="section-number-3">5.2</span> Korean Rice Bowls</h3>
+<div class="outline-text-3" id="text-5-2">
+</div>
+<div id="outline-container-orgbba5d45" class="outline-4">
+<h4 id="orgbba5d45"><span class="section-number-4">5.2.1</span> Ingredients</h4>
+<div class="outline-text-4" id="text-5-2-1">
+<ul class="org-ul">
+<li>2 Cups Cooked Rice</li>
+<li>2 Tbsp Gochujang</li>
+<li>4 Tbsp Soy Sauce</li>
+<li>1 Tbsp Rice Vinegar</li>
+<li>2 Tbsp Water</li>
+<li>4 Large Portobello Mushrooms</li>
+<li>1 Yellow Onion</li>
+<li>1 Cucumber</li>
+<li>1 Carrot</li>
+<li>2 green onions</li>
+<li>Sesame Seeds</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org14dd1bd" class="outline-4">
+<h4 id="org14dd1bd"><span class="section-number-4">5.2.2</span> Prep</h4>
+<div class="outline-text-4" id="text-5-2-2">
+<ul class="org-ul">
+<li>Slice Onion</li>
+<li>Grate Carrot</li>
+<li>Slice Cucumber on bias</li>
+<li>Slice Green Onions on bias</li>
+<li>Slice Mushrooms in half, then crosswise.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org5591a1f" class="outline-4">
+<h4 id="org5591a1f"><span class="section-number-4">5.2.3</span> Instructions</h4>
+<div class="outline-text-4" id="text-5-2-3">
+<p>
+First, begin by preparing the Mushroom Marinade. Mix together the
+Gochujang, Soy Sauce, Rice Vinegar, and Water. Add mushrooms to marinade.
+Mix till all the mushrooms are coated, and let stand for 10 minutes.
+</p>
+
+<p>
+Mix together 1Tbsp Rice vinegar, 1 Tsp sugar, and a sprinkle of
+salt. Add cucumber and let stand, occasionally mixing.
+</p>
+
+<p>
+Heat pan with a smal amount of oil on medium-high. Add onions and let cook
+until translucent. Add mushrooms and marinade then cook till sauce
+is somewhat reduced, about 7-9 minutes.
+</p>
+
+<p>
+Prepare rice bowls by laying down rice, adding mushroom/onions,
+then cucumbers, then carrots. Sprinkle with green onion and sesame seeds.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga28db57" class="outline-3">
+<h3 id="orga28db57"><span class="section-number-3">5.3</span> Sesame Noodles</h3>
+<div class="outline-text-3" id="text-5-3">
+</div>
+<div id="outline-container-orgd850936" class="outline-4">
+<h4 id="orgd850936"><span class="section-number-4">5.3.1</span> Ingredients</h4>
+<div class="outline-text-4" id="text-5-3-1">
+<ul class="org-ul">
+<li>4 scallions, whites and greens separated, thinly sliced</li>
+<li>1/2 cup vegetable oil</li>
+<li>1 tablespoon crushed red pepper flakes</li>
+<li>2 teaspoons sesame seeds</li>
+<li>2 teaspoons Sichuan pepper, coarsely chopped</li>
+<li>12 ounces thin noodles</li>
+<li>Kosher salt</li>
+<li>1/4 cup tahini (sesame seed paste)</li>
+<li>1/4 cup unseasoned rice vinegar</li>
+<li>3 tablespoons soy sauce</li>
+<li>2 teaspoons toasted sesame oil</li>
+<li>1 teaspoon sugar</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org856348c" class="outline-4">
+<h4 id="org856348c"><span class="section-number-4">5.3.2</span> Instructions</h4>
+<div class="outline-text-4" id="text-5-3-2">
+<p>
+Cook scallion whites, vegetable oil, red pepper flakes, sesame
+seeds, and pepper in a small saucepan over low heat, stirring
+occasionally, until oil is sizzling and scallions are golden
+brown, 12–15 minutes; let chili oil cool in saucepan.
+</p>
+
+<p>
+Meanwhile, cook noodles in a large pot of salted boiling water
+until al dente; drain. Rinse under cold water and drain well.
+</p>
+
+<p>
+Whisk tahini, vinegar, soy sauce, sesame oil, sugar, and 2–3
+tablespoons chili oil (depending on desired heat) in a large bowl;
+season with salt. Add noodles and toss to coat. Top with scallion
+greens and drizzle with more chili oil.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8dcc556" class="outline-3">
+<h3 id="org8dcc556"><span class="section-number-3">5.4</span> Chicken Paprikish</h3>
+<div class="outline-text-3" id="text-5-4">
+</div>
+<div id="outline-container-org1040875" class="outline-4">
+<h4 id="org1040875"><span class="section-number-4">5.4.1</span> Ingredients</h4>
+<div class="outline-text-4" id="text-5-4-1">
+<ul class="org-ul">
+<li>1 Yellow Onion</li>
+<li>1 Red Pepper</li>
+<li>1/4 Cup Hungarian Sweet Paprika</li>
+<li>1 Bay Leaf</li>
+<li>1 Cup Chicken Stock</li>
+<li>4 Chicken Legs</li>
+<li>1/2 Sour Cream</li>
+<li>Dill</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orge060333" class="outline-4">
+<h4 id="orge060333"><span class="section-number-4">5.4.2</span> Prep</h4>
+<div class="outline-text-4" id="text-5-4-2">
+<p>
+Slice onions and bell peppers into medium sized slivers. Split
+chicken legs into thighs and drumsticks.
+</p>
+</div>
+</div>
+<div id="outline-container-org9bfe4ce" class="outline-4">
+<h4 id="org9bfe4ce"><span class="section-number-4">5.4.3</span> Instructions</h4>
+<div class="outline-text-4" id="text-5-4-3">
+<p>
+Season chicken on all sides with salt and pepper. Heat a small
+amount of high-smokepoint oil in a pan over medium heat. Once the
+oil is hot, add the chicken pieces skin side down and cook without
+disturbing for about 8 minutes. Flip over and cook until the other
+side for about 2 minutes. Move chicken to a plate, and remove all
+but a small amount of fat from the pan.
+</p>
+
+<p>
+Saute onions and red peppers on medium heat for about 7 minutes.
+Add the paprika and cook while stirring rapidly, making sure not
+to let the paprika burn, for 1 minute. Add the stock, and scrape
+up anything stuck to the bottom of the pan. Add the bay leaf, then
+place the chicken in a single layer into the pan, skin side up.
+</p>
+
+<p>
+Place the heat on low, and cover the pan and cook until the
+chicken is tender all the way through, which ought to take about
+30 minutes.
+</p>
+
+<p>
+Once the chicken is cooked, remove it, and add the sour cream into
+the sauce. Stir until it is mixed thoroughly, then readd the
+chicken back in the sauce, turning to coat.
+</p>
+
+<p>
+When serving, garnish with extra sour cream and minced dill.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org905ca14" class="outline-3">
+<h3 id="org905ca14"><span class="section-number-3">5.5</span> Oyakodon</h3>
+<div class="outline-text-3" id="text-5-5">
+</div>
+<div id="outline-container-org9db6526" class="outline-4">
+<h4 id="org9db6526"><span class="section-number-4">5.5.1</span> Ingredients</h4>
+<div class="outline-text-4" id="text-5-5-1">
+<ul class="org-ul">
+<li>1 Cup <a href="#org6c22923">Dashi</a></li>
+<li>1 Tbsp Soy Sauce</li>
+<li>2 Tbsp Sake</li>
+<li>1 Tbsp Sugar</li>
+<li>1 Large Onion</li>
+<li>340 grams Chicken Thighs</li>
+<li>3 Green Onions</li>
+<li>4 Eggs</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgf9e89a9" class="outline-4">
+<h4 id="orgf9e89a9"><span class="section-number-4">5.5.2</span> Prep</h4>
+<div class="outline-text-4" id="text-5-5-2">
+<p>
+Slice onions into slivers. Slice Scalions, and divide into 2 piles.
+Thinly slice chicken
+</p>
+</div>
+</div>
+<div id="outline-container-org2034b31" class="outline-4">
+<h4 id="org2034b31"><span class="section-number-4">5.5.3</span> Instructions</h4>
+<div class="outline-text-4" id="text-5-5-3">
+<p>
+Combine Dashi, Soy Sauce, Sake, and sugar in a saucepan and bring
+to a simmer over high heat. Stir in onion and cook until the
+onion is just barely tender, about 5 minutes. Add chicken slices
+and cook, stirring occasionally. Continue until chichken is cooked
+through, about 6 minutes. Stir in half of the green onions, and
+season the broth with soy sauce and sugar to taste.
+</p>
+
+<p>
+Reduce heat, maintaining a bare simmer. Beat eggs in a medium
+bowl, and slowly pour the eggs into the pot in a thin, steady
+stream, using chopsticks to control the flow. Cover and cook until
+the eggs are cooked to your liking, which should be in the 1-3
+minute range.
+</p>
+
+<p>
+To serve, place cooked rice in bowls, and top with egg and chicken
+mixture, adding any extra broth to the rice. Garnish with the
+remaining green onions.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org3923ca2" class="outline-2">
+<h2 id="org3923ca2"><span class="section-number-2">6</span> Baking</h2>
+<div class="outline-text-2" id="text-6">
+</div>
+<div id="outline-container-org7db56bd" class="outline-3">
+<h3 id="org7db56bd"><span class="section-number-3">6.1</span> Overnight White Bread</h3>
+<div class="outline-text-3" id="text-6-1">
+<ul class="org-ul">
+<li>White Flour (500g)</li>
+<li>Kosher Salt (14 g)</li>
+<li>Yeast (1/4 Tsp)</li>
+</ul>
+</div>
+<div id="outline-container-orgbef2573" class="outline-4">
+<h4 id="orgbef2573"><span class="section-number-4">6.1.1</span> Instructions</h4>
+<div class="outline-text-4" id="text-6-1-1">
+<p>
+Mix together flour and 390 grams of warm water in a bowl until no
+dry flour remains, and let stand covered with a cloth for 30 minutes.
+</p>
+
+<p>
+Next, add the salt and yeast and fold until incorporated. Then,
+gently fold the dough in half 4 or 5 times, or until the dough
+becomes harder to work. Let rest for 30 minutes, and repeat this
+folding process 3 more times, waiting 30 minutes between each.
+</p>
+
+<p>
+Once the folds are complete, let the dough sit overnight covered
+by a towel (roughly 8 to 12 hours).
+</p>
+
+<p>
+Once this bulk rise has completed, turn the dough onto an
+<span class="underline">unfloured</span> work surface. Working quickly, grab the right hand
+side of the bread, and fold 2/3ds of the way over. Then, grab the
+left hand side, and do the same. Next, grab the back side of the
+bread and fold over as well. Now, roll the dough towards you until
+the seam is on the bottom. Now, take the dough in both hands and
+rotate it around to form a ball, making sure not to lift it from
+the work surface. Once the outer skin of the dough has built up
+sufficient tension, dust the top with flour until it is no longer
+tacky, and place in a bowl lined with a towel, floured side down.
+</p>
+
+<p>
+Let the dough rest for about 45 minutes. In the mean time, place a
+dutch oven in the oven at 475 degrees, and let it heat up. When
+the resting period is done, quickly turn out the dough onto a
+piece of parchment paper. Score the top using a sharp knife, and
+then lift the parchment paper into the hot dutch oven. Cover and
+let bake for 20 minutes. Once the 20 minutes is up, uncover and
+let bake until the top is a rich brown. Remove, and let cool.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org9e89eba" class="outline-3">
+<h3 id="org9e89eba"><span class="section-number-3">6.2</span> Sourdough Starter</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+To start, mix together a 50/50 blend of whole wheat and white
+flour. Then add warm water slowly and mix, until you reach a batter
+like consistency. Leave in a warm, dark place covered with a paper towel
+for 3 days, checking every day. Around the third day, the starter
+should start to smell a bit funky and fruity, and should have grown
+in size or formed bubbles.
+</p>
+
+<p>
+Once you have cultivated your starter, it is quite easy to use,
+feed, and maintain it. To use, discard all but one tablespoon of
+the starter, and feed again with a 50/50 blend of whole wheat and
+white flour and water, getting it to a batter like consistency.
+Let this develop for 24 hours. You will know it is ready when it
+floats when placed in water.
+</p>
+
+<p>
+For the overnight white loaf, I like to use about 100 grams of
+starter, and reduce the water to about 370 grams.
+</p>
+
+<p>
+Starter is easiest to work with when you get into a rythm, as
+discarded starter will be used in a loaf of bread, and you can feed
+at the same time as making the dough to be ready for the next day.
+However, baking a loaf of bread every day is a big ask, and not
+always realistic! In these cases, you can put the starter in a
+sealed jar in the fridge to make it go dormant. Just make sure to
+check on it every once and a while to make sure it doesn't dry out.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org780ee2b" class="outline-3">
+<h3 id="org780ee2b"><span class="section-number-3">6.3</span> Japanese Milk Bread</h3>
+<div class="outline-text-3" id="text-6-3">
+</div>
+<div id="outline-container-orgbcfeeb6" class="outline-4">
+<h4 id="orgbcfeeb6"><span class="section-number-4">6.3.1</span> Ingredients</h4>
+<div class="outline-text-4" id="text-6-3-1">
+</div>
+<ol class="org-ol">
+<li><a id="orgac14d0e"></a>Roux<br />
+<div class="outline-text-5" id="text-6-3-1-1">
+<ul class="org-ul">
+<li>20 grams flour</li>
+<li>100 grams water</li>
+</ul>
+</div>
+</li>
+<li><a id="orgfdd9961"></a>Dough<br />
+<div class="outline-text-5" id="text-6-3-1-2">
+<ul class="org-ul">
+<li>330 grams flour</li>
+<li>24 grams sugar</li>
+<li>14 grams powdered milk</li>
+<li>7 grams salt</li>
+<li>4 grams instant yeast</li>
+<li>95 grams warm water</li>
+<li>1 egg</li>
+<li>20 grams butter</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div id="outline-container-orga301c03" class="outline-4">
+<h4 id="orga301c03"><span class="section-number-4">6.3.2</span> Instructions</h4>
+<div class="outline-text-4" id="text-6-3-2">
+<p>
+First, mix together all the dry ingredients from the <b>Dough</b>
+section. Then, proceed to make the roux by whisking the flour into
+the water in a small pot. Heat on medium low, stirring
+continuously. It is done when pulling a spatula through it allows
+you to see the bottom.
+</p>
+
+<p>
+Add all the water, egg, and roux to the dry ingredient
+mixture. Mix, then knead until the dough comes together. Then,
+slowly incorporate the butter while kneading, until the dough is
+slightly tacky. Shape the dough into a ball, then place in a
+greased bowl.
+</p>
+
+<p>
+Cover the dough, and let rise for about an hour, or until it has
+roughly doubled in size. Punch down the dough, divide into halves,
+and reshape into balls. Let the dough rest again for 20 minutes on
+the counter.
+</p>
+
+<p>
+Roll out each ball into an elongated elipse, and fold into thirds lengthwise.
+Roll out the dough again in the same manner, then roll the dough
+up into a log.
+</p>
+
+<p>
+Place both rolls in a loaf pan with the seam facing down. Let
+the dough proof, until it has filled up the pan. Bake at 350F for
+35 minutes. Remove from the pan and let cool on a rack.
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Reed Mullanix</p>
+<p class="date">Created: 2021-02-07 Sun 11:04</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
