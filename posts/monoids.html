@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-02-19 Fri 13:30 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Monoids: Transformations in Disguise</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Reed Mullanix" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Monoids: Transformations in Disguise</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orga69a39e">1. Monoids</a></li>
+<li><a href="#org448e1df">2. Homomorphisms</a></li>
+<li><a href="#orgceeb217">3. Transformations</a></li>
+<li><a href="#org4b5c598">4. The Punchline</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orga69a39e" class="outline-2">
+<h2 id="orga69a39e"><span class="section-number-2">1</span> Monoids</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+If you've written any haskell, you are probably well versed with the
+concept of a Monoid, and how <i>unreasonably</i> effective they are at
+solving problems. They show up absolutely everywhere, and can make a
+lot of problems dissolve right before your eyes. However, this post is
+not about their concrete applications, but rather a meander through the
+theoretical woods, where we instead try to discover <span class="underline">why</span> they are so
+effective, and explore an alternative perspective on our friend the Monoid.
+</p>
+
+<p>
+To start, some recap. The dry, technical definition is as follows:
+</p>
+<blockquote>
+<p>
+A monoid is a set equipped with an associative binary operation and an identity element.
+</p>
+</blockquote>
+
+<p>
+The slightly less dry version is:
+</p>
+<blockquote>
+<p>
+A monoid is a set equipped with a means of combining two elements
+together, along with a sort of neutral elemement. Combining this
+neutral element with anything does nothing!
+</p>
+</blockquote>
+
+<p>
+We represent this notion in Haskell as a typeclass<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>:
+</p>
+<div class="org-src-container">
+<pre class="src src-haskell">class Monoid a where
+    mempty :: a
+    (&lt;&gt;) :: a -&gt; a -&gt; a
+</pre>
+</div>
+
+<p>
+No less important are the laws! There are 3:
+</p>
+<div class="org-src-container">
+<pre class="src src-agda2">(a &lt;&gt; b) &lt;&gt; c ≈ a &lt;&gt; (b &lt;&gt; c)
+mempty &lt;&gt; a ≈ a
+a &lt;&gt; mempty ≈ mempty
+</pre>
+</div>
+
+<p>
+As a slight digression, you may be wondering what that wonky <code>≈</code>
+symbol means! I use this notation to stress that what we mean by
+"equality" here is not nessicarily Haskell's version, va <code>==</code>. As we
+can't reason about proofs within haskell (yet!), so we have to do our
+reasoning elsewhere. If this seems confusing, don't worry! It's a
+tricky concept, and we will get into more detail in a moment.
+</p>
+
+<p>
+Now, there are a plethora of instances here, including some of the
+greatest hits: <code>[a]</code>, <code>Sum Int</code>, <code>Prod Int</code>, etc, as well as some more
+exotic ones that we won't delve into now.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org448e1df" class="outline-2">
+<h2 id="org448e1df"><span class="section-number-2">2</span> Homomorphisms</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+This is where we start to leave Haskell, and explore more uncharted
+territory. To start, let us examine a handful of functions that
+<span class="underline">feel</span> very fundemental:
+</p>
+<div class="org-src-container">
+<pre class="src src-haskell">length :: [a] -&gt; Int
+
+isEmpty :: [a] -&gt; Bool
+
+isOdd :: Int -&gt; Bool
+</pre>
+</div>
+
+<p>
+Now, a philosophical question: Why do these functions feel "nicer" than
+something like:
+</p>
+<div class="org-src-container">
+<pre class="src src-haskell">gross :: [a] -&gt; Int
+gross [x,y,z] = 4
+gross [] = 3
+gross xs = 84
+</pre>
+</div>
+
+<p>
+I claim that this is because all of the nice functions take monoids
+as their inputs, return monoids as their output, and "preserve" the
+structure of the monoid in the following sense:
+</p>
+<div class="org-src-container">
+<pre class="src src-agda2">length [] ≈ 0
+length (xs ++ ys) = length xs + length ys
+
+isEmpty [] ≈ True
+isEmpty (xs ++ ys) ≈ isEmpty xs &amp;&amp; isEmpty ys
+
+isOdd 0 ≈ False
+isOdd (x + y) ≈ isOdd x || isOdd y
+</pre>
+</div>
+
+<p>
+Looking at the pattern, we can see that a function <code>f : a -&gt; b</code> is "nice" if
+the following laws hold:
+</p>
+<div class="org-src-container">
+<pre class="src src-agda2">f (a &lt;&gt; b) ≈ f a &lt;&gt; f b
+f mempty   ≈ mempty
+</pre>
+</div>
+
+<p>
+We call these nice functions <b>Homomorphisms</b>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgceeb217" class="outline-2">
+<h2 id="orgceeb217"><span class="section-number-2">3</span> Transformations</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Now, one finaly piece of equipment is required. This piece of
+equipment is a single Monoid instance<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup> :
+</p>
+
+<div class="org-src-container">
+<pre class="src src-haskell">newtype Transformation a = Transformation { runTransformation :: a -&gt; a }
+
+instance Semigroup (Transformation a) where
+    (Transformation f) &lt;&gt; (Transformation g) = Transformation $ f . g
+instance Monoid (Transformation a) where
+    mempty = Transformation id
+</pre>
+</div>
+
+<p>
+Once we peel back all of the ceremony involved with the <code>newtypes</code>, we
+can see that the core idea is rather simple! Our set is <code>a -&gt; a</code>, and our
+identity element is <code>id : a -&gt; a</code>. Now, before we can ponder the laws,
+we need to think about what it means for two functions to be equal in
+the first place! This is a suprisingly tricky question, and one that I
+could devote a <span class="underline">lot</span> of time to, but that is for another day! For now,
+let us consider two functions equal if the "behave the same". This
+means that we will consider <code>f</code> and <code>g</code> equal if the have the same
+outputs for every input, or <code>forall x. f x ≈ g x</code>.
+</p>
+
+<p>
+Now that we have decided what it means for two functions are equal,
+let's prove those laws!
+</p>
+<div class="org-src-container">
+<pre class="src src-agda2">associativity:
+((f . g) . h) x                 ≈ -- By definition of (.)
+(\y -&gt; (f . g) (h y)) x         ≈ -- β-reduction
+(f . g) (h x)                   ≈ -- By definition of (.)
+(\y - f (g y)) (h x)            ≈ -- β-reduction
+f (g (h x))                     ≈ -- β-expansion
+(\y -&gt; f (g (h y))) x           ≈ -- β-expansion
+(\y -&gt; f ((\z -&gt; g (h z)) y)) x ≈ -- By definition of (.)
+(\y -&gt; f ((g . h) y)) x         ≈ -- By definition of (.)
+(f . (g . h)) x                 ∎
+
+left identity:
+(id . f) x         ≈ -- By definition of (.)
+(\y -&gt; id (f y)) x ≈ -- β-reduction
+id (f x)           ≈ -- By definition of id
+(\y -&gt; y) (f x)    ≈ -- β-reduction
+f x                ∎
+
+right identity:
+(f . id) x         ≈ -- By definition of (.)
+(\y -&gt; f (id y)) x ≈ -- β-reduction
+f (id x)           ≈ -- By definition of id
+(f ((\y -&gt; y) x))  ≈ -- β-reduction
+f x                ∎
+</pre>
+</div>
+<p>
+If these proofs are scary, don't worry! Equational reasoning is an
+aquired taste, so if you are confused, feel free to move on.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4b5c598" class="outline-2">
+<h2 id="org4b5c598"><span class="section-number-2">4</span> The Punchline</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Now that we have all of the machinery we need, we can talk about a
+curious fact, namely, that we can view <span class="underline">any</span> Monoid <code>a</code> as a collection
+of transformations <code>a -&gt; a</code>!
+</p>
+
+<p>
+However, the embedding into <code>Transformation</code> is so simple that it can be hard
+to wrap your head around.
+</p>
+<div class="org-src-container">
+<pre class="src src-haskell">asTransformation :: Monoid a =&gt; a -&gt; Transformation a
+asTransformation x = Transformation $ \y -&gt; x &lt;&gt; y
+</pre>
+</div>
+
+<p>
+I find that, like most things, drawing a picture tends to clarify
+things. Let's using the Integers under addition as our first example.
+What does viewing, say, <code>2</code> as a transformation look like?
+</p>
+
+<div id="org70aca1c" class="figure">
+<p><img src="./plus_two.png" alt="plus_two.png" style="margin-left: auto; margin-right: auto;" />
+</p>
+</div>
+
+<p>
+As we can see, adding two shifts the whole number line to the right
+by two! As an exercise, think about what multiplying by two looks
+like as an action!
+</p>
+
+<p>
+Interestingly enough, <code>asTransformation</code> is a Monoid Homomorphism!
+Here is yet another overly detailed proof:
+</p>
+<div class="org-src-container">
+<pre class="src src-agda2">asTransformation (x &lt;&gt; y)               ≈ -- By definition of asTransformation
+\z -&gt; (x &lt;&gt; y) &lt;&gt; z                     ≈ -- Associativity of &lt;&gt;
+\z -&gt; x &lt;&gt; (y &lt;&gt; z)                     ≈ -- By definition of.
+(x &lt;&gt;) . (y &lt;&gt;)                         ≈ -- By definition of asTransformation
+asTransformation x . asTransformation y ∎
+
+asTransformation mempty ≈ -- By definition of asTransformation
+\x -&gt; mempty &lt;&gt; x       ≈ -- By left identity
+\x -&gt; x                 ≈ -- By definition of id
+id                      ∎
+</pre>
+</div>
+
+<p>
+Now, what does all of this <span class="underline">mean</span>? The way I like to think about it
+is that Monoids <i>are</i> nice collections of transformations. This
+shift in perspective gives a hint as to why they are so ubiquitous
+in programming: Programming is, at the end of the day, largely about
+transformations, so it makes sense that collections of well behaved
+transformations show up all over the place.
+</p>
+
+<p>
+Furthermore, armed with this perspective, we can begin to explore
+even further, and we will in future!
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+In <code>base</code> there is an intermediate class <code>Semigroup</code> that holds
+<code>(&lt;&gt;)</code>,  but let's not worry about that for now.
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+We call this instance <code>Transformation</code> for clarity, but it is
+called <code>Endo</code> in <code>base</code>.
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="date">Date: 2021-02-19 Fri 00:00</p>
+<p class="author">Author: Reed Mullanix</p>
+<p class="date">Created: 2021-02-19 Fri 13:30</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
