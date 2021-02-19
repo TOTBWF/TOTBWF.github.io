@@ -343,7 +343,7 @@ isEmpty [] ≈ True
 isEmpty (xs ++ ys) ≈ isEmpty xs &amp;&amp; isEmpty ys
 
 isOdd 0 ≈ False
-isOdd (x + y) ≈ isOdd x || isOdd y
+isOdd (x + y) ≈ isOdd x `xor` isOdd y
 </pre>
 </div>
 
