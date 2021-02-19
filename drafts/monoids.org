@@ -45,7 +45,7 @@
   tricky concept, and we will get into more detail in a moment.
 
   Now, there are a plethora of instances here, including some of the
-  greatest hits: ~[a]~, ~Sum Int~, ~Prod Int~, ~Any ~, etc, as well as some more
+  greatest hits: ~[a]~, ~Sum Int~, ~Prod Int~, etc, as well as some more
   exotic ones that we won't delve into now.
 
 * Homomorphisms
@@ -105,7 +105,7 @@
         mempty = Transformation id
   #+END_SRC
 
-  Once we peel back all of the cerimony involved with the ~newtypes~, we
+  Once we peel back all of the ceremony involved with the ~newtypes~, we
   can see that the core idea is rather simple! Our set is ~a -> a~, and our
   identity element is ~id : a -> a~. Now, before we can ponder the laws,
   we need to think about what it means for two functions to be equal in
@@ -161,6 +161,7 @@
   I find that, like most things, drawing a picture tends to clarify
   things. Let's using the Integers under addition as our first example.
   What does viewing, say, ~2~ as a transformation look like?
+  #+ATTR_HTML: :style margin-left: auto; margin-right: auto;
   [[file:./plus_two.png]]
 
   As we can see, adding two shifts the whole number line to the right

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-02-19 Fri 10:27 -->
+<!-- 2021-02-19 Fri 13:30 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Monoids: Transformations in Disguise</title>
@@ -223,16 +223,16 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd7ad6f1">1. Monoids</a></li>
-<li><a href="#org5827288">2. Homomorphisms</a></li>
-<li><a href="#orgb7d4bd0">3. Transformations</a></li>
-<li><a href="#orgce6d072">4. The Punchline</a></li>
+<li><a href="#orga69a39e">1. Monoids</a></li>
+<li><a href="#org448e1df">2. Homomorphisms</a></li>
+<li><a href="#orgceeb217">3. Transformations</a></li>
+<li><a href="#org4b5c598">4. The Punchline</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgd7ad6f1" class="outline-2">
-<h2 id="orgd7ad6f1"><span class="section-number-2">1</span> Monoids</h2>
+<div id="outline-container-orga69a39e" class="outline-2">
+<h2 id="orga69a39e"><span class="section-number-2">1</span> Monoids</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 If you've written any haskell, you are probably well versed with the
@@ -295,14 +295,14 @@ tricky concept, and we will get into more detail in a moment.
 
 <p>
 Now, there are a plethora of instances here, including some of the
-greatest hits: <code>[a]</code>, <code>Sum Int</code>, <code>Prod Int</code>, ~Any ~, etc, as well as some more
+greatest hits: <code>[a]</code>, <code>Sum Int</code>, <code>Prod Int</code>, etc, as well as some more
 exotic ones that we won't delve into now.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org5827288" class="outline-2">
-<h2 id="org5827288"><span class="section-number-2">2</span> Homomorphisms</h2>
+<div id="outline-container-org448e1df" class="outline-2">
+<h2 id="org448e1df"><span class="section-number-2">2</span> Homomorphisms</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 This is where we start to leave Haskell, and explore more uncharted
@@ -363,8 +363,8 @@ We call these nice functions <b>Homomorphisms</b>.
 </div>
 </div>
 
-<div id="outline-container-orgb7d4bd0" class="outline-2">
-<h2 id="orgb7d4bd0"><span class="section-number-2">3</span> Transformations</h2>
+<div id="outline-container-orgceeb217" class="outline-2">
+<h2 id="orgceeb217"><span class="section-number-2">3</span> Transformations</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Now, one finaly piece of equipment is required. This piece of
@@ -382,7 +382,7 @@ instance Monoid (Transformation a) where
 </div>
 
 <p>
-Once we peel back all of the cerimony involved with the <code>newtypes</code>, we
+Once we peel back all of the ceremony involved with the <code>newtypes</code>, we
 can see that the core idea is rather simple! Our set is <code>a -&gt; a</code>, and our
 identity element is <code>id : a -&gt; a</code>. Now, before we can ponder the laws,
 we need to think about what it means for two functions to be equal in
@@ -431,8 +431,8 @@ aquired taste, so if you are confused, feel free to move on.
 </div>
 </div>
 
-<div id="outline-container-orgce6d072" class="outline-2">
-<h2 id="orgce6d072"><span class="section-number-2">4</span> The Punchline</h2>
+<div id="outline-container-org4b5c598" class="outline-2">
+<h2 id="org4b5c598"><span class="section-number-2">4</span> The Punchline</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Now that we have all of the machinery we need, we can talk about a
@@ -454,8 +454,12 @@ asTransformation x = Transformation $ \y -&gt; x &lt;&gt; y
 I find that, like most things, drawing a picture tends to clarify
 things. Let's using the Integers under addition as our first example.
 What does viewing, say, <code>2</code> as a transformation look like?
-<img src="./plus_two.png" alt="plus_two.png" />
 </p>
+
+<div id="org70aca1c" class="figure">
+<p><img src="./plus_two.png" alt="plus_two.png" style="margin-left: auto; margin-right: auto;" />
+</p>
+</div>
 
 <p>
 As we can see, adding two shifts the whole number line to the right
@@ -516,7 +520,7 @@ called <code>Endo</code> in <code>base</code>.
 <div id="postamble" class="status">
 <p class="date">Date: 2021-02-19 Fri 00:00</p>
 <p class="author">Author: Reed Mullanix</p>
-<p class="date">Created: 2021-02-19 Fri 10:27</p>
+<p class="date">Created: 2021-02-19 Fri 13:30</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
