@@ -217,5 +217,38 @@
    #+END_SRC
 
 ** ~toAlgebra . fromAlgebra = id~ and ~fromAlgebra . toAlgebra = id~
-   Reed is lazy and hasn't wrote these yet! For now, they are an
-   exercise for the reader.
+
+   First, let's show that ~toAlgebra . fromAlgebra = id~. Note that we
+   will need to compare equality of functions here, so let's do that
+   extensionally. We will also perform induction on the pointwise arguments.
+   #+BEGIN_SRC haskell
+     -- Base Case
+     toAlgebra/fromAlgebra/nil:
+     toAlgebra (fromAlgebra alg) [] = foldr (\x y -> alg [x, y]) (alg []) []
+                                    = alg []
+
+     -- Inductive Case
+     -- Induction Hypothesis: toAlgebra (fromAlgebra alg) xs = alg xs
+     toAlgebra/fromAlgebra/cons:
+     toAlgebra (fromAlgebra alg) (x : xs) = foldr (\x y -> alg [x, y]) (alg []) (x : xs)    -- By Defn of toAlgebra and fromAlgebra
+                                          = alg [x, foldr (\x y -> alg [x, y]) (alg []) xs] -- By Defn of foldr
+                                          = alg [x, alg xs]                                 -- Inductive Hypothesis
+                                          = alg [alg [x], alg xs]                           -- By eval/pure
+                                          = alg $ fmap alg [[x], xs]                        -- By Defn of fmap
+                                          = alg $ join [[x], xs]                            -- By eval/join
+                                          = alg (x : xs)                                    -- By Defn of join
+   #+END_SRC
+
+   Now, onto ~fromAlgebra . toAlgebra = id~. We need to compare
+   equality of monoids here, so let's check that the mempty and
+   mappends we get are the same ones we started with.
+   #+BEGIN_SRC haskell
+     fromAlgebra/toAlgebra/mempty
+     Monoid.mempty (fromAlgebra (toAlgebra m)) = foldr (<>) mempty [] -- By Defn of fromAlgebra and toAlgebra
+                                               = mempty               -- By Defn of foldr
+
+     fromAlgebra/toAlgebra/mappend
+     Monoid.mappend (fromAlgebra (toAlgebra m)) x y = foldr (<>) mempty [x, y] -- By Defn of fromAlgebra and toAlgebra
+                                                    = x <> (y <> mempty)       -- By Defn of foldr
+                                                    = x <> y                   -- By right identity
+   #+END_SRC

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-04-17 Sat 15:03 -->
+<!-- 2021-04-17 Sat 15:35 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Monadicity for the Curious Programmer</title>
@@ -223,24 +223,24 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org73dcd3c">1. Introduction</a></li>
-<li><a href="#org1725f5e">2. Algebra</a></li>
-<li><a href="#org053e2ba">3. Monads</a></li>
-<li><a href="#org868be5c">4. A Surprising Equivalence</a></li>
-<li><a href="#orgcce78af">5. Conclusion</a></li>
-<li><a href="#orgfd5e1f7">6. Proofs</a>
+<li><a href="#orgeabb56b">1. Introduction</a></li>
+<li><a href="#orgd5f18eb">2. Algebra</a></li>
+<li><a href="#orgd1578d7">3. Monads</a></li>
+<li><a href="#org79dcc94">4. A Surprising Equivalence</a></li>
+<li><a href="#org4d6b185">5. Conclusion</a></li>
+<li><a href="#orgd46c681">6. Proofs</a>
 <ul>
-<li><a href="#org7890054">6.1. <code>toAlgebra</code> is a T-Algebra</a></li>
-<li><a href="#orgc56c8c5">6.2. <code>fromAlgebra</code> is a Monoid</a></li>
-<li><a href="#org5c01f20">6.3. <code>toAlgebra . fromAlgebra = id</code> and <code>fromAlgebra . toAlgebra = id</code></a></li>
+<li><a href="#org58e94e4">6.1. <code>toAlgebra</code> is a T-Algebra</a></li>
+<li><a href="#orgc542b65">6.2. <code>fromAlgebra</code> is a Monoid</a></li>
+<li><a href="#org700b3cc">6.3. <code>toAlgebra . fromAlgebra = id</code> and <code>fromAlgebra . toAlgebra = id</code></a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org73dcd3c" class="outline-2">
-<h2 id="org73dcd3c"><span class="section-number-2">1</span> Introduction</h2>
+<div id="outline-container-orgeabb56b" class="outline-2">
+<h2 id="orgeabb56b"><span class="section-number-2">1</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Today, I want to tell an interesting story about algebraic
@@ -252,8 +252,8 @@ the beginning.
 </p>
 </div>
 </div>
-<div id="outline-container-org1725f5e" class="outline-2">
-<h2 id="org1725f5e"><span class="section-number-2">2</span> Algebra</h2>
+<div id="outline-container-orgd5f18eb" class="outline-2">
+<h2 id="orgd5f18eb"><span class="section-number-2">2</span> Algebra</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The story starts, like many good programming stories, with the idea
@@ -321,8 +321,8 @@ F-Algebra, and refer to the following Haskell type:
 </div>
 </div>
 
-<div id="outline-container-org053e2ba" class="outline-2">
-<h2 id="org053e2ba"><span class="section-number-2">3</span> Monads</h2>
+<div id="outline-container-orgd1578d7" class="outline-2">
+<h2 id="orgd1578d7"><span class="section-number-2">3</span> Monads</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Now, for a bit of conflict. For some choices of <code>f</code> in our
@@ -390,8 +390,8 @@ the literature.
 </p>
 </div>
 </div>
-<div id="outline-container-org868be5c" class="outline-2">
-<h2 id="org868be5c"><span class="section-number-2">4</span> A Surprising Equivalence</h2>
+<div id="outline-container-org79dcc94" class="outline-2">
+<h2 id="org79dcc94"><span class="section-number-2">4</span> A Surprising Equivalence</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Now that the stage is set and we have met our cast of characters, we
@@ -405,7 +405,7 @@ toAlgebra xs = foldr (&lt;&gt;) mempty xs
 </div>
 
 <p>
-Those interested in the proofs of these laws can check the <a href="#orgfd5e1f7">Proofs</a> section.
+Those interested in the proofs of these laws can check the <a href="#orgd46c681">Proofs</a> section.
 </p>
 
 <p>
@@ -423,7 +423,7 @@ fromAlgebra alg = Monoid
 </div>
 <p>
 The Monoid laws fall out of the T-Algebra laws we imposed
-earlier. Again, interested readers can check the <a href="#orgfd5e1f7">Proofs</a> section for
+earlier. Again, interested readers can check the <a href="#orgd46c681">Proofs</a> section for
 the full proofs of this.
 </p>
 
@@ -434,7 +434,7 @@ which is what causes this whole series of events to unfurl. In
 categorical language, we would say that the Category of T-Algebras
 for Lists is <b>equivalent</b> to the Category of Monoids. This does
 require us to show that <code>toAlgebra . fromAlgebra = id</code> and
-<code>fromAlgebra . toAlgebra = id</code>, but that is relegated to the <a href="#orgfd5e1f7">Proofs</a> section.
+<code>fromAlgebra . toAlgebra = id</code>, but that is relegated to the <a href="#orgd46c681">Proofs</a> section.
 </p>
 
 <p>
@@ -446,8 +446,8 @@ as groups, T-Algebras for free modules are the same as modules, etc.
 </div>
 </div>
 
-<div id="outline-container-orgcce78af" class="outline-2">
-<h2 id="orgcce78af"><span class="section-number-2">5</span> Conclusion</h2>
+<div id="outline-container-org4d6b185" class="outline-2">
+<h2 id="org4d6b185"><span class="section-number-2">5</span> Conclusion</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 So what does this actually <i>mean</i>? Personally, it gives me a new
@@ -465,12 +465,12 @@ search are "Monadic Functor" and "Monadicity".
 </p>
 </div>
 </div>
-<div id="outline-container-orgfd5e1f7" class="outline-2">
-<h2 id="orgfd5e1f7"><span class="section-number-2">6</span> Proofs</h2>
+<div id="outline-container-orgd46c681" class="outline-2">
+<h2 id="orgd46c681"><span class="section-number-2">6</span> Proofs</h2>
 <div class="outline-text-2" id="text-6">
 </div>
-<div id="outline-container-org7890054" class="outline-3">
-<h3 id="org7890054"><span class="section-number-3">6.1</span> <code>toAlgebra</code> is a T-Algebra</h3>
+<div id="outline-container-org58e94e4" class="outline-3">
+<h3 id="org58e94e4"><span class="section-number-3">6.1</span> <code>toAlgebra</code> is a T-Algebra</h3>
 <div class="outline-text-3" id="text-6-1">
 <p>
 The first one is relatively straightforward:
@@ -509,8 +509,8 @@ toAlgebra $ fmap toAlgebra (ms : mss) = toAlgebra $ (toAlgebra ms) : fmap toAlge
 </div>
 </div>
 
-<div id="outline-container-orgc56c8c5" class="outline-3">
-<h3 id="orgc56c8c5"><span class="section-number-3">6.2</span> <code>fromAlgebra</code> is a Monoid</h3>
+<div id="outline-container-orgc542b65" class="outline-3">
+<h3 id="orgc542b65"><span class="section-number-3">6.2</span> <code>fromAlgebra</code> is a Monoid</h3>
 <div class="outline-text-3" id="text-6-2">
 <p>
 First, left and right identities. The proof of the left identity is
@@ -546,13 +546,49 @@ Now, associativity:
 </div>
 </div>
 
-<div id="outline-container-org5c01f20" class="outline-3">
-<h3 id="org5c01f20"><span class="section-number-3">6.3</span> <code>toAlgebra . fromAlgebra = id</code> and <code>fromAlgebra . toAlgebra = id</code></h3>
+<div id="outline-container-org700b3cc" class="outline-3">
+<h3 id="org700b3cc"><span class="section-number-3">6.3</span> <code>toAlgebra . fromAlgebra = id</code> and <code>fromAlgebra . toAlgebra = id</code></h3>
 <div class="outline-text-3" id="text-6-3">
 <p>
-Reed is lazy and hasn't wrote these yet! For now, they are an
-exercise for the reader.
+First, let's show that <code>toAlgebra . fromAlgebra = id</code>. Note that we
+will need to compare equality of functions here, so let's do that
+extensionally. We will also perform induction on the pointwise arguments.
 </p>
+<div class="org-src-container">
+<pre class="src src-haskell">-- Base Case
+toAlgebra/fromAlgebra/nil:
+toAlgebra (fromAlgebra alg) [] = foldr (\x y -&gt; alg [x, y]) (alg []) []
+			       = alg []
+
+-- Inductive Case
+-- Induction Hypothesis: toAlgebra (fromAlgebra alg) xs = alg xs
+toAlgebra/fromAlgebra/cons:
+toAlgebra (fromAlgebra alg) (x : xs) = foldr (\x y -&gt; alg [x, y]) (alg []) (x : xs)    -- By Defn of toAlgebra and fromAlgebra
+				     = alg [x, foldr (\x y -&gt; alg [x, y]) (alg []) xs] -- By Defn of foldr
+				     = alg [x, alg xs]                                 -- Inductive Hypothesis
+				     = alg [alg [x], alg xs]                           -- By eval/pure
+				     = alg $ fmap alg [[x], xs]                        -- By Defn of fmap
+				     = alg $ join [[x], xs]                            -- By eval/join
+				     = alg (x : xs)                                    -- By Defn of join
+</pre>
+</div>
+
+<p>
+Now, onto <code>fromAlgebra . toAlgebra = id</code>. We need to compare
+equality of monoids here, so let's check that the mempty and
+mappends we get are the same ones we started with.
+</p>
+<div class="org-src-container">
+<pre class="src src-haskell">fromAlgebra/toAlgebra/mempty
+Monoid.mempty (fromAlgebra (toAlgebra m)) = foldr (&lt;&gt;) mempty [] -- By Defn of fromAlgebra and toAlgebra
+					  = mempty               -- By Defn of foldr
+
+fromAlgebra/toAlgebra/mappend
+Monoid.mappend (fromAlgebra (toAlgebra m)) x y = foldr (&lt;&gt;) mempty [x, y] -- By Defn of fromAlgebra and toAlgebra
+					       = x &lt;&gt; (y &lt;&gt; mempty)       -- By Defn of foldr
+					       = x &lt;&gt; y                   -- By right identity
+</pre>
+</div>
 </div>
 </div>
 </div>
@@ -560,7 +596,7 @@ exercise for the reader.
 <div id="postamble" class="status">
 <p class="date">Date: 2021-04-17 Sat 00:00</p>
 <p class="author">Author: Reed Mullanix</p>
-<p class="date">Created: 2021-04-17 Sat 15:03</p>
+<p class="date">Created: 2021-04-17 Sat 15:35</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
