@@ -15,8 +15,8 @@
   with a few of these: ~Semigroup~, ~Monoid~, etc. However, there are
   a huge number of increasingly fancy structures that we don't see as
   often: Rings, Vector Spaces, Abelian Groups, etc. What unites all of these
-  things together under the banner of "Algebra". Furthermore, what
-  even /is/ algebra all about.
+  things together under the banner of "Algebra"? Furthermore, what
+  even /is/ algebra all about?
 
   Here's one perspective: Algebra is about the reduction or evaluation of expressions.
   For instance, given some expression language, we could consider
@@ -66,7 +66,7 @@
 * Monads
   Now, for a bit of conflict. For some choices of ~f~ in our
   F-Algebras, we have _two_ ways of reducing down a structure!
-  Particularly, if ~f~ is a ~Monad~, we have can either:
+  Particularly, if ~f~ is a ~Monad~, we can either:
   1. Run the ~Algebra~ to reduce an ~f a~ to an ~a~
   2. Use ~join :: f (f a) -> f a~ to smoosh two layers of ~f~ together
 
