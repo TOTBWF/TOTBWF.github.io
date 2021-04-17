@@ -1,0 +1,221 @@
+#+TITLE: Monadicity for the Curious Programmer
+#+AUTHOR: Reed Mullanix
+#+DATE: <2021-04-17 Sat>
+
+* Introduction
+  Today, I want to tell an interesting story about algebraic
+  structures and their evaluators. After we are finished, we will have
+  learned some non-trivial category theory, and gained a greater
+  appreciation for some of the basic tools that we take for
+  granted. However, before we tell the end of the story, we must tell
+  the beginning.
+* Algebra
+  The story starts, like many good programming stories, with the idea
+  of an algebraic structure. Most Haskell folks are pretty familiar
+  with a few of these: ~Semigroup~, ~Monoid~, etc. However, there are
+  a huge number of increasingly fancy structures that we don't see as
+  often: Rings, Vector Spaces, Abelian Groups, etc. What unites all of these
+  things together under the banner of "Algebra". Furthermore, what
+  even /is/ algebra all about.
+
+  Here's one perspective: Algebra is about the reduction or evaluation of expressions.
+  For instance, given some expression language, we could consider
+  "evaluators" of the expression language:
+  #+BEGIN_SRC haskell
+    data Expr a = Op (Expr a) (Expr a) | Lit a
+
+    type Evaluator a = Expr a -> a
+
+    sumExpr :: Evaluator Int
+    sumExpr (Op a b) = (sumExpr a) + (sumExpr b)
+    sumExpr (Lit a) = a
+
+    andExpr :: Evaluator Bool
+    andExpr (Op a b) = (andExpr a) && (andExpr b)
+    andExpr (Lit a) = a
+  #+END_SRC
+
+  Now, for a teeny bit of sweeping generalization. All that ~Expr~
+  does here is provide a bunch of ~a~ with some sort of structure
+  binding them together. There's nothing special about it! Therefore,
+  we can think about "evaluators" for /any/ sort of expression
+  structure by making it a type parameter to ~Evaluator~:
+  #+BEGIN_SRC haskell
+    type Evaluator f a = f a -> a
+
+    sumExpr :: Evaluator Expr Int
+    sumExpr (Op a b) = (sumExpr a) + (sumExpr b)
+    sumExpr (Lit a) = a
+
+    sumList :: Evaluator [] Int
+    sumList = sum
+  #+END_SRC
+
+  Now, it is totally reasonable to regard this with suspicion. What do
+  we achieve by doing this? From a purely programming standpoint, not a
+  whole lot. However, this is a huge perspective shift. What we've
+  done here is capture the essence of "reduction of a structure" in a
+  very simple construct! Furthermore, our ~Evaluator~ type is actually
+  a core idea in Categorical Algebra, where it has another name: an *F-Algebra*.
+  To keep things in line with the theory, moving forward I will using
+  F-Algebra, and refer to the following Haskell type:
+  #+BEGIN_SRC haskell
+    type Algebra f a = f a -> a
+  #+END_SRC
+
+* Monads
+  Now, for a bit of conflict. For some choices of ~f~ in our
+  F-Algebras, we have _two_ ways of reducing down a structure!
+  Particularly, if ~f~ is a ~Monad~, we have can either:
+  1. Run the ~Algebra~ to reduce an ~f a~ to an ~a~
+  2. Use ~join :: f (f a) -> f a~ to smoosh two layers of ~f~ together
+
+  This is quite the pickle! The whole point of this generalization is
+  to capture the essence of reduction, and now we are presented two
+  different ways! What a mess.
+
+  However, like many problems, we can resolve it by adding some laws
+  that make sure that our ~Algebra~ and our ~Monad~ instance
+  "play nicely". Let's say we have some ~eval :: Algebra f a~, as
+  well as ~Monad f~. Our first law should be pretty unobjectionable:
+  #+BEGIN_SRC haskell
+    eval/pure: id = eval . pure
+  #+END_SRC
+  What this law says is that making an ~f a~ via ~pure~ and
+  immediately evaluating it down ought to be the same as doing
+  nothing. If we test this out with our ~sumList~ evaluator before,
+  this makes a lot of sense:
+  #+BEGIN_SRC haskell
+    sumList $ pure n = sumList [n]
+                     = n
+  #+END_SRC
+
+  Now, for the second law. This one is a bit trickier, so build it up
+  piece by piece. The original problem at hand was that we could
+  reduce down an ~f (f a)~ to an ~a~ in two ways:
+  1. We smoosh the two layers together via ~join~ to get an ~f a~,
+     then ~eval~ it.
+  2. We first ~eval~ the inner layer via ~fmap eval~ to get an ~f a~,
+     then ~eval~ the outer layer.
+
+  Therefore, our law will say that these two things ought to be the same!
+  #+BEGIN_SRC haskell
+    eval/join : eval . fmap eval = eval . join
+  #+END_SRC
+
+  Now, let's give these extra-fancy F-Algebras a name, or rather, use
+  the name that mathematicians have given them: *T-Algebras*. The "T"
+  here refers to the common practice of denoting a monad with ~T~ in
+  the literature.
+* A Surprising Equivalence
+  Now that the stage is set and we have met our cast of characters, we
+  can finally start to tell the _actual_ story! Let's start with an observation:
+  We can turn any ~Monoid~ into a T-Algebra for lists:
+  #+BEGIN_SRC haskell
+    toAlgebra :: Monoid m => Algebra [] m
+    toAlgebra xs = foldr (<>) mempty xs
+  #+END_SRC
+
+  Those interested in the proofs of these laws can check the [[*Proofs][Proofs]] section.
+
+  Now, time for the crazy part: Given a T-Algebra, we can construct a
+  lawful Monoid! As Haskell doesn't let us programatically construct
+  instances, let's just pretend a Monoid is a record for now:
+  #+BEGIN_SRC haskell
+    fromAlgebra ::: Algebra [] m -> Monoid m
+    fromAlgebra alg = Monoid
+        { mempty = alg []
+        , mappend = \x y -> alg [x, y]
+        }
+  #+END_SRC
+  The Monoid laws fall out of the T-Algebra laws we imposed
+  earlier. Again, interested readers can check the [[*Proofs][Proofs]] section for
+  the full proofs of this.
+
+  So in some sense, T-Algebras for lists are the _same_ as Monoids!
+  This is no coincidence. In particular, lists form the Free Monoid,
+  which is what causes this whole series of events to unfurl. In
+  categorical language, we would say that the Category of T-Algebras
+  for Lists is *equivalent* to the Category of Monoids. This does
+  require us to show that ~toAlgebra . fromAlgebra = id~ and
+  ~fromAlgebra . toAlgebra = id~, but that is relegated to the [[*Proofs][Proofs]] section.
+
+  The even more incredible part is that this isn't just restricted to
+  Monoids. This works for all "well behaved" algebraic structures you
+  can dream up! For instance, T-Algebras for free groups are the same
+  as groups, T-Algebras for free modules are the same as modules, etc.
+
+* Conclusion
+  So what does this actually /mean/? Personally, it gives me a new
+  perspective on how to think about algebraic structures. Rather than
+  being a collection of operations and laws, we can think of them as
+  providing a way of interpreting particular types of expression
+  trees, or reducing down particular types of data structures. This
+  also opens the gate to all sorts of amazing generalization, where we
+  can view things that don't traditionally look algebraic as algebras!
+  For instance, this works for the power-set functor ~Setᵒᵖ → Set~, as
+  well as for certain types of spaces. All in all, I think this is a
+  gem of Categorical Algebra, and one that ought to be
+  appreciated. If you would like to learn more, the magic words to
+  search are "Monadic Functor" and "Monadicity".
+* Proofs
+** ~toAlgebra~ is a T-Algebra
+  The first one is relatively straightforward:
+  #+BEGIN_SRC haskell
+    eval/pure:
+    toAlgebra (pure m) = toAlgebra [m]         -- By Defn. of pure
+                       = foldr (<>) mempty [m] -- By Defn. of toAlgebra
+                       = m <> mempty           -- By Defn. of foldr
+                       = m                     -- By right identity law for monoids
+  #+END_SRC
+
+  However, the next requires a proof by induction:
+  #+BEGIN_SRC haskell
+    -- Base Case:
+    eval/join/nil:
+    toAlgebra $ fmap toAlgebra [] = toAlgebra []        -- By Defn. of fmap
+                                  = toAlgebra $ join [] -- By Defn. of join
+
+    -- Inductive Case
+    -- Inductive Hypothesis: 'toAlgebra $ fmap toAlgebra mss = toAlgebra $ join mss'
+    eval/join/cons:
+    toAlgebra $ fmap toAlgebra (ms : mss) = toAlgebra $ (toAlgebra ms) : fmap toAlgebra mss        -- By Defn. of fmap
+                                        = foldr (<>) mempty $ (toAlgebra ms) : fmap toAlgebra mss  -- By Defn. of toAlgebra
+                                        = toAlgebra ms <> (foldr (<>) mempty $ fmap toAlgebra mss) -- By Defn. of foldr
+                                        = toAlgebra ms <> toAlgebra (join mss)                     -- Inductive Hypothesis
+                                        = (foldr (<>) mempty ms) <> (foldr (<>) mempty $ join mss) -- By Defn. of toAlgebra
+                                        = foldr (<>) mempty $ (ms ++ join mss)                     -- By Defn. of foldr, monoid assoc, and monoid identity
+                                        = foldr (<>) mempty $ join (ms : mss)                      -- By Defn. of join
+                                        = toAlgebra $ join (ms : mss)                              -- By Defn. of toAlgebra
+  #+END_SRC
+
+** ~fromAlgebra~ is a Monoid
+   First, left and right identities. The proof of the left identity is
+   basically the same, so we only provide the right.
+   #+BEGIN_SRC haskell
+     monoid/identity/right:
+     m <> mempty = alg [m, alg []]          -- By Defn. of <> and mempty
+                 = alg [alg [m], alg []]    -- By eval/pure
+                 = alg $ fmap alg [[m], []] -- By Defn. of fmap
+                 = alg $ join [[m], []]     -- By eval/join
+                 = alg [m]                  -- By Defn. of join
+                 = m                        -- By eval/pure
+   #+END_SRC
+
+   Now, associativity:
+   #+BEGIN_SRC haskell
+     monoid/assoc:
+     (x <> y) <> z = alg [alg [x, y], z]         -- By Defn. of <>
+                   = alg [alg [x, y], alg [z]]   -- By eval/pure
+                   = alg $ fmap alg [[x,y], [z]] -- By Defn. of fmap
+                   = alg $ join [[x, y], [z]]    -- By eval/join
+                   = alg $ join [[x], [y, z]]    -- By Defn. of join
+                   = alg $ fmap alg [[x], [y,z]] -- By eval/join
+                   = alg [alg [x], alg [y, z]]   -- By Defn. of fmap
+                   = alg [x, alg [y, z]]         -- By eval/pure
+                   = x <> (y <> z)               -- By Defn. of <>
+   #+END_SRC
+
+** ~toAlgebra . fromAlgebra = id~ and ~fromAlgebra . toAlgebra = id~
+   Reed is lazy and hasn't wrote these yet! For now, they are an
+   exercise for the reader.
