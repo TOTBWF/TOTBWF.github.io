@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-04-25 Sun 16:19 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Simple Simplices</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Reed Mullanix" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Simple Simplices</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org8e6de3a">1. A Sticky Simplex Situation</a></li>
+<li><a href="#orgfdcc59e">2. Simplify Your Simplices</a></li>
+<li><a href="#orgc7fb08a">3. Automatically Simplify your Simplices</a></li>
+<li><a href="#orgcdef147">4. Conclusion</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org8e6de3a" class="outline-2">
+<h2 id="org8e6de3a"><span class="section-number-2">1</span> A Sticky Simplex Situation</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Simplicial Sets are notoriously annoying to do in proof
+assistants. Really, the problem comes down to how we define Δ,
+the simplex category. You really have 2 options here:
+</p>
+<ol class="org-ol">
+<li>Define Δ as the category of finite ordinals and monotone maps.</li>
+<li>Define Δ as a free category generated by face and degeneracy maps, quotiented
+by the simplicial identities.</li>
+</ol>
+
+<p>
+Both have appealing characteristics, but each has it's own millstone
+that will sink any sort of serious attempts to use them. Option
+number 1 is easy to define, and equalities are simple to think
+about, but defining functors out of it becomes extremely hairy
+extremely quick. The problem is that we want to be able to define
+simplicial sets by how they act on the face and boundary maps, not
+some random monotonic map! Option 2 solves this problem, but
+suddenly equality becomes extremely difficult to deal with, as the
+simplicial identities are not exactly "nice". If only there was a
+way that we could combine these two approaches&#x2026;
+</p>
+
+<p>
+For reference, the following exploration is written in Agda, using
+the (excellent) <a href="https://github.com/agda/agda-categories/">agda-categories</a> library.
+</p>
+</div>
+</div>
+<div id="outline-container-orgfdcc59e" class="outline-2">
+<h2 id="orgfdcc59e"><span class="section-number-2">2</span> Simplify Your Simplices</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+As previously mentioned, we want to be able to define simplicial
+sets by their action on face and boundary maps, so let's take those
+to be our notion of morphism. We also need to chuck in identities
+and composites for good measure.
+</p>
+<div class="org-src-container">
+<pre class="src src-agda2">data _Δ⇒_ : ℕ → ℕ → Set where
+  ε  : ∀ {n} → n Δ⇒ n
+  δ  : ∀ {n} → (i : Fin (suc n)) → n Δ⇒ (suc n)
+  σ  : ∀ {n} → (j : Fin n) → (suc n) Δ⇒ n
+  _⊚_ : ∀ {l m n} → m Δ⇒ n → l Δ⇒ m → l Δ⇒ n
+</pre>
+</div>
+
+<p>
+Now, we don't want to use the simplicial identities, because they
+are extremely unpleasant to work with. As a refresher, here they are:
+</p>
+<pre class="example" id="org913004d">
+δᵢ ∘ δⱼ = δⱼ₊₁ ∘ δᵢ if i ≤ j
+σⱼ ∘ σᵢ = σᵢ ∘ σⱼ₊₁ if i ≤ j
+σⱼ ∘ δᵢ = δᵢ ∘ σⱼ₋₁ if i &lt; j
+σⱼ ∘ δᵢ = id        if i = j or i = j + 1
+σⱼ ∘ δᵢ = δᵢ₋₁ ∘ σⱼ if j + 1 &lt; i
+</pre>
+<p>
+Ooof! Those are not going to be fun to use.
+</p>
+
+<p>
+Instead, let us appeal to the semantics of our formal chains of
+morphisms as maps between finite ordinals.
+</p>
+<div class="org-src-container">
+<pre class="src src-agda2">face : ∀ {n} → Fin (ℕ.suc n) → Fin n → Fin (ℕ.suc n)
+face Fin.zero    k           = Fin.suc k
+face (Fin.suc i) Fin.zero    = Fin.zero
+face (Fin.suc i) (Fin.suc k) = Fin.suc (face i k)
+
+degen : ∀ {n} → Fin n → Fin (ℕ.suc n) → Fin n
+degen Fin.zero    Fin.zero    = Fin.zero
+degen Fin.zero    (Fin.suc k) = k
+degen (Fin.suc i) Fin.zero    = Fin.zero
+degen (Fin.suc i) (Fin.suc k) = Fin.suc (degen i k)
+
+⟦_⟧ : ∀ {m n} → m Δ⇒ n → (Fin m → Fin n)
+⟦ ε ⟧ x = x
+⟦ δ i ⟧ x = face i x
+⟦ σ j ⟧ x = degen j x
+⟦ f ⊚ g ⟧ x = ⟦ f ⟧ (⟦ g ⟧ x)
+</pre>
+</div>
+
+<p>
+What we have done here is define a sort of "interpreter" from the
+language of morphisms of Δ into good, honest functions. Now, what
+does this buy us? Well, we can define equality of morphisms by
+appealing to our semantics!
+</p>
+<div class="org-src-container">
+<pre class="src src-agda2">record _≗_ {m n} (f g : m Δ⇒ n) : Set where
+  constructor Δ-eq
+  field
+    Δ-pointwise : ∀ {x} → ⟦ f ⟧ x ≡ ⟦ g ⟧ x
+</pre>
+</div>
+<p>
+Now, we get the best of both definitions! We can work inductively
+over morphisms in Δ, while still having a nice, easy way to reason
+about equality.
+</p>
+</div>
+</div>
+<div id="outline-container-orgc7fb08a" class="outline-2">
+<h2 id="orgc7fb08a"><span class="section-number-2">3</span> Automatically Simplify your Simplices</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Now, if we had a means of decomposing any monotone map <code>Fin m → Fin
+  n</code> into a series of face/degeneracy maps, we could perform a bit of
+a magic trick. Let's just assume for the sake of argument that we
+had a function:
+</p>
+<div class="org-src-container">
+<pre class="src src-agda2">decompose : ∀ {m n} → (Fin m → Fin n) → (m Δ⇒ n)
+</pre>
+</div>
+<p>
+Now, let's assume that this function will yield a sort of "canonical
+form" for each map. Namely, it ought to return a composition of the form:
+</p>
+<pre class="example" id="org2aa061c">
+δᵢ₁ ∘ ... ∘ δᵢₖ ∘ σⱼ₁ ∘ ... ∘ σⱼₕ
+</pre>
+<p>
+If we had such a function, then we would have a means of writing a
+solver for morphisms in Δ! We could simply reflect our morphisms in
+Δ into monotonic maps, then decompose the resulting map to get a
+canonical form back out. With a bit of metaprogramming, this could
+easily be wired up to create a solver. Normalization By Evaluation
+strikes again!
+</p>
+
+<p>
+Now, writing such a <code>decompose</code> function is a bit tricky, but isn't
+impossible. Perhaps some brave soul would like to try!
+</p>
+</div>
+</div>
+<div id="outline-container-orgcdef147" class="outline-2">
+<h2 id="orgcdef147"><span class="section-number-2">4</span> Conclusion</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+This presentation is far easier to work with than either of the
+other two options explored. After trying it out in <a href="https://github.com/agda/agda-categories/">agda-categories</a>,
+I've already been able to define some Simplicial Sets that were far
+out of reach using the monotonic map approach. For instance, it's
+possible to define the Nerve of a Category quite easily now that we
+can perform induction on the maps of Δ. If you have any questions or
+comments, feel free to reach out to me on twitter at <a href="https://twitter.com/totbwf">@totbwf</a>. I
+would love to see this idea explored in other proof assistants as
+well, so let me know if you implement it elsewhere!
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2021-04-25 Sun 00:00</p>
+<p class="author">Author: Reed Mullanix</p>
+<p class="date">Created: 2021-04-25 Sun 16:19</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
