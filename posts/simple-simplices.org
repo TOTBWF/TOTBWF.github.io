@@ -112,4 +112,6 @@
   can perform induction on the maps of Δ. If you have any questions or
   comments, feel free to reach out to me on twitter at [[https://twitter.com/totbwf][@totbwf]]. I
   would love to see this idea explored in other proof assistants as
-  well, so let me know if you implement it elsewhere!
+  well, so let me know if you implement it elsewhere! Furthermore,
+  thanks to the ever helpful sarahzf for listening to my terrible
+  ideas and giving me better ones.
