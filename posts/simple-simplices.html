@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-04-25 Sun 16:19 -->
+<!-- 2021-04-25 Sun 16:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Simple Simplices</title>
@@ -223,16 +223,16 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org8e6de3a">1. A Sticky Simplex Situation</a></li>
-<li><a href="#orgfdcc59e">2. Simplify Your Simplices</a></li>
-<li><a href="#orgc7fb08a">3. Automatically Simplify your Simplices</a></li>
-<li><a href="#orgcdef147">4. Conclusion</a></li>
+<li><a href="#org21f841b">1. A Sticky Simplex Situation</a></li>
+<li><a href="#org3029c7e">2. Simplify Your Simplices</a></li>
+<li><a href="#orgfcc842a">3. Automatically Simplify your Simplices</a></li>
+<li><a href="#org260760a">4. Conclusion</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org8e6de3a" class="outline-2">
-<h2 id="org8e6de3a"><span class="section-number-2">1</span> A Sticky Simplex Situation</h2>
+<div id="outline-container-org21f841b" class="outline-2">
+<h2 id="org21f841b"><span class="section-number-2">1</span> A Sticky Simplex Situation</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Simplicial Sets are notoriously annoying to do in proof
@@ -264,8 +264,8 @@ the (excellent) <a href="https://github.com/agda/agda-categories/">agda-categori
 </p>
 </div>
 </div>
-<div id="outline-container-orgfdcc59e" class="outline-2">
-<h2 id="orgfdcc59e"><span class="section-number-2">2</span> Simplify Your Simplices</h2>
+<div id="outline-container-org3029c7e" class="outline-2">
+<h2 id="org3029c7e"><span class="section-number-2">2</span> Simplify Your Simplices</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 As previously mentioned, we want to be able to define simplicial
@@ -286,7 +286,7 @@ and composites for good measure.
 Now, we don't want to use the simplicial identities, because they
 are extremely unpleasant to work with. As a refresher, here they are:
 </p>
-<pre class="example" id="org913004d">
+<pre class="example" id="orga8b508a">
 δᵢ ∘ δⱼ = δⱼ₊₁ ∘ δᵢ if i ≤ j
 σⱼ ∘ σᵢ = σᵢ ∘ σⱼ₊₁ if i ≤ j
 σⱼ ∘ δᵢ = δᵢ ∘ σⱼ₋₁ if i &lt; j
@@ -341,8 +341,8 @@ about equality.
 </p>
 </div>
 </div>
-<div id="outline-container-orgc7fb08a" class="outline-2">
-<h2 id="orgc7fb08a"><span class="section-number-2">3</span> Automatically Simplify your Simplices</h2>
+<div id="outline-container-orgfcc842a" class="outline-2">
+<h2 id="orgfcc842a"><span class="section-number-2">3</span> Automatically Simplify your Simplices</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Now, if we had a means of decomposing any monotone map <code>Fin m → Fin
@@ -358,7 +358,7 @@ had a function:
 Now, let's assume that this function will yield a sort of "canonical
 form" for each map. Namely, it ought to return a composition of the form:
 </p>
-<pre class="example" id="org2aa061c">
+<pre class="example" id="orga35af42">
 δᵢ₁ ∘ ... ∘ δᵢₖ ∘ σⱼ₁ ∘ ... ∘ σⱼₕ
 </pre>
 <p>
@@ -376,8 +376,8 @@ impossible. Perhaps some brave soul would like to try!
 </p>
 </div>
 </div>
-<div id="outline-container-orgcdef147" class="outline-2">
-<h2 id="orgcdef147"><span class="section-number-2">4</span> Conclusion</h2>
+<div id="outline-container-org260760a" class="outline-2">
+<h2 id="org260760a"><span class="section-number-2">4</span> Conclusion</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 This presentation is far easier to work with than either of the
@@ -388,7 +388,9 @@ possible to define the Nerve of a Category quite easily now that we
 can perform induction on the maps of Δ. If you have any questions or
 comments, feel free to reach out to me on twitter at <a href="https://twitter.com/totbwf">@totbwf</a>. I
 would love to see this idea explored in other proof assistants as
-well, so let me know if you implement it elsewhere!
+well, so let me know if you implement it elsewhere! Furthermore,
+thanks to the ever helpful sarahzf for listening to my terrible
+ideas and giving me better ones.
 </p>
 </div>
 </div>
@@ -396,7 +398,7 @@ well, so let me know if you implement it elsewhere!
 <div id="postamble" class="status">
 <p class="date">Date: 2021-04-25 Sun 00:00</p>
 <p class="author">Author: Reed Mullanix</p>
-<p class="date">Created: 2021-04-25 Sun 16:19</p>
+<p class="date">Created: 2021-04-25 Sun 16:42</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
