@@ -1,0 +1,183 @@
+#+title: Unicode, Source Spans, Editor Tooling, and You
+
+* Introduction
+One of the most difficult part of writing a programming language is
+creating good error messages. It's one thing to create a fancy new
+type theory that has some exellent features, but making that /usable/ 
+adds a whole layer of complexity atop a very complex thing. This blog
+post aims to address one tiny, underdiscussed problem involved in
+doing this: properly handling source spans in the presence of Unicode.
+* Variable Width Encodings
+Most of the advice surrounding source spans seems to focus on the fact
+that the popular Unicode encodings (UTF-8 and UTF-16) are
+*Variable Width Encodings*. This means that a single "character"[fn:1]
+may be represented by a variable number of bytes. For instance, in UTF-8 all of
+the ASCII characters are represented by a single byte, but something
+like the 'λ' character is represented by 2 bytes. This seems to imply
+that byte indexing is fundamentally broken, as the number of bytes no longer
+lines up with a multiple of the number of characters.
+
+This leads to the very common advice to "use codepoints
+instead". Let's break down precisely what that means before we get
+into why (in this specific case) that is bad advice. In Unicode parlance,
+a *Codepoint* is a well-formed sequence of bits. These /usually/ represent 
+single graphemes (what we think of as a character), but this is not
+always the case! For instance, consider the 'ä' character: this
+consists of 2 codepoints: one for the 'a' (0x61), and the other
+for the umlaut diacritic (0x308). If we were counting codepoints, then
+the column number for ~foo~ in the following source code would be incorrect:
+#+BEGIN_SRC haskell
+  let ä = foo
+          ^^^
+#+END_SRC
+
+This is why "just use codepoints" is bad advice: codepoints do not
+line up with what we think of as characters.
+* Grapheme Clusters
+What we /should/ be counting instead are *Grapheme
+Clusters*. These are defined to be "horizontally segmentable unit of text".
+In plain terms, these are what we think of as characters when we are
+using a computer. For instance, if you were to select a grapheme
+cluster like 'ä' in our editor, it would get selected as a single
+unit; there's no way to just select the 'a' or the umlaut.
+
+This may seem like the notion of "character" we are looking for, but
+the notion of "character" is, to be honest, a bit fuzzy.
+Is 🏳️‍🌈 a single character? Thise may render as a single glyph
+for some people, but this is in fact font-dependent. Many emojis are
+implemented via [[https://www.unicode.org/emoji/charts/emoji-zwj-sequences.html][Zero-Width-Joiner Sequences]]: they consist of a bunch
+of existing emojis together with a magic "Zero-Width-Joiner" codepoint
+that hints to the font-renderer that, if possible, the sequence should
+be rendered as a single glyph. For instance, 🏳️‍🌈 is /really/ 🏳️+ZWJ+🌈.
+This is very useful for when your font may not support an emoji: at
+the very least we can render something meaningful, and not ⍰.
+
+However, this makes even the notion of column numbers somewhat
+meaningless from an error-message perspective. If we can't determine
+how wide a user may percieve a glyph to be, we have no chance of giving
+a good column number! This means that there's only really a single
+2 meaningful operations one can do with a source spans: combine them,
+or use them to index into source code.
+* Source Spans Done Right
+Now, with all of this talk of grapheme clusters, it may seem like they
+are the correct option, and we should use them as our source span indicies.
+Unfortunately, this isn't a viable solution for a couple of reasons.
+First, indexing by grapheme cluster will involve [[https://unicode.org/reports/tr29/][segmentation]], or the
+process of chopping up a unicode string into grapheme clusters. This
+is an O(n) operation, and as we've discussed before, doesn't even
+capture what a user will see on their display.
+
+We might then try to use codepoints, but this is also a mistake. As
+noted earlier, really all we can do with a span is slice into strings,
+and indexing by codepoints is an O(n) operation, which is unacceptable.
+
+This leaves byte-indexing, which may seem like sacrilege to many!
+We've all had "never byte-index UTF-8
+encoded text" hammered into our heads 10000 times. However, UTF-8 is a
+marvelously well-engineered encoding, and it is not possible to form
+valid code points by slicing existing code points in half. This means
+that if that our initial byte indexes lie on code point
+boundaries[fn:2], then we can slice away to our hearts content.
+
+This leaves us with the following design for a span type:
+#+BEGIN_SRC haskell
+  data Span = Span
+      { start     :: Int
+      -- ^ The absolute position of the span start, in bytes.
+      , startBol  :: Int
+      -- ^ The absolute position of the beginning of the line of span start, in bytes.
+      , startLine :: Int
+      -- ^ The line number of the span start.
+      , end       :: Int
+      -- ^ The absolute position of the span end, in bytes.
+      , endBol    :: Int
+      -- ^ The absolute position of the beginning of the line of span end, in bytes.
+      , stopLine  :: Int
+      -- ^ The line number of the span end.
+      , filename  :: String
+      -- ^ The filename.
+      }
+#+END_SRC
+
+By tracking the start of the lines, it's easy to slice out entire
+lines, which is a common operation when working with spans. One might
+be tempted to compute column numbers by doing grapheme-cluster
+counting between the ~startBol~ and ~start~ fields, but as noted
+above, this is a fools errand. If we want to be correct, we have to
+accept that the notion of a column number is somewhat malformed.
+* Source Spans and Error Messages
+From here, it may be tempting to try and pretty-print spans in error
+messages using some sort of ASCII art or box-drawing
+characters. However, this too is a mistake, as it's basically
+impossible to figure out how wide the span will be on the users
+display, even when we ignore the problem of ZWJ sequences. As an
+extreme example, the ﷽ glyph is a single grapheme cluster[fn:3], so it
+will throw off any sort of underlining logic in your error rendering.
+Now, this may seem like a somewhat contrived example, but there are
+plenty of characters that someone may want to use that /may/ render
+wider than a single cell. Furthermore, this is largely font-dependent,
+and is thus impossible to figure out how wide the character is without
+being able to interact with the device the error message is being
+rendered on (for instance, the terminal emulator).
+
+Instead, the best option is to take the advice of the Unicode
+Consortium themselves, and rely on markup languages or
+platform-specific features to handle styling of unicode text.
+For terminal display, this is best handled by [[https://vt100.net/docs/vt510-rm/SGR.html][SGR codes]]
+for underlining, and other platforms/editors have their own mechanisms.
+* Source Spans and Editor Tooling
+Now that we are properly handling error messages, we may want to write
+some editor tooling for our language. As of 2022, the most commonly
+used protocol for editor tooling is the the [[https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/][Language Server Protocol]],
+or LSP. As one might expect, a large part of the protocol involves
+communicating information about various source positions/spans. This
+is where things get somewhat difficult. LSP expects us to specify
+positions in terms of codepoints, but we want to use byte-indexing for
+our spans, and it's going to be an O(n) operation to convert these
+into codepoints.
+
+To make matters more complex, as LSP was developed at Microsoft,
+they chose *UTF-16* codepoints as their default position index. Before
+LSP 3.17 this was your only choice, but now there is the option to
+perform a [[https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#serverCapabilities][negotiation step]] upon server startup to chose the position
+encoding type. However, for backwards compatibility reasons, servers
+are still required to support UTF-16 codepoints, which makes the
+following advice regarding byte-indexed spans entirely moot.
+
+However, many clients[fn:4] either /only/ support UTF-8 positions, or
+provide support for UTF-8 positions, so in my opinion it's a much more
+reasonable option to disregard the spec and only provide support for UTF-8.
+Dealing with Unicode is tricky enough, we don't need to make it worse
+on ourselves by tying ourselves to some poor engineering choices.
+
+Another alternative is to follow =clangd='s lead, and implement the
+[[https://clangd.llvm.org/extensions.html#utf-8-offsets][UTF-8 offset extension]] to the protocol. This allows us to advertise to
+clients that we support byte-indexed positions, which, as discussed
+above, are the most optimal choice from a performance
+perspective. This is implemented by /most/ clients (though less than
+UTF-8 codepoints). Hopefully Microsoft will realize that this is a good
+idea, and add it to the standard in the future.
+* Conclusion
+In summary, if you are trying to add source spans to your language:
+- Spans should only be used to slice/index source code.
+- Don't include column numbers in error messages: they are rife with
+  edge cases.
+- If you have to include column numbers: count grapheme clusters instead.
+- Don't try to underline errors with ASCII art or box-drawing characters,
+  use SGR or other more semantic mechanisms instead.
+- Use byte-indexed spans if you don't need to support LSP.
+- Use UTF-8 codepoint-indexed spans if you want to support all LSP clients.
+- Use the =clangd= UTF-8 offset extension if you want to have the most
+  optimal implementation possible.
+
+Now, go out into the world, and write some programming languages 🙂
+
+[fn:1] Calling these characters is a bit of a misnomer, as we will
+discuss later.
+[fn:2] It's actually possible to check if a byte-index lies on a
+codepoint boundary just by indexing. As mentioned earlier, UTF-8 is
+very well engineered!
+[fn:3] ﷽ is actually a single codepoint too!
+[fn:4] From a quick survery, [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]] /only/ supports UTF-8 (see [[https://github.com/emacs-lsp/lsp-mode/issues/2080][here]]
+and [[https://github.com/emacs-lsp/lsp-mode/issues/3344][here]]), [[https://github.com/joaotavora/eglot][elgot]] only supports UTF-8 by default (see [[https://github.com/joaotavora/eglot/issues/244][here]]), and both
+[[https://code.visualstudio.com/][VsCode]] and [[https://neovim.io][NeoVim]] support UTF-8 (see [[https://neovim.io/doc/user/lsp.html][here]]).

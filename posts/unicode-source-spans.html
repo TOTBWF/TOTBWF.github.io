@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-06-08 Wed 18:04 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Unicode, Source Spans, Editor Tooling, and You</title>
+<meta name="author" content="Reed Mullanix" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+</style>
+<style>
+           .org-svg { width: auto }
+           .diagram { display: flex; justify-content: center }
+           .latex { display: flex; justify-content: center; padding-bottom: 1.5em }
+           body { background-color: #121111; color: #fafafa; font-size: 1.15e; font-family: lato,Helvetica,Arial,sans-serif; line-height: 1.8 }
+           pre { background-color: #121111 }
+           a { color: #fafafa }
+           a:hover { color: #121111; background-color: #fafafa }
+         </style>
+
+        <style>
+        /* From: https://endlessparentheses.com/public/css/endless.css */
+        /* See also: https://meta.superuser.com/questions/4788/css-for-the-new-kbd-style */
+        kbd
+        {
+          -moz-border-radius: 6px;
+          -moz-box-shadow: 0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+          -webkit-border-radius: 6px;
+          -webkit-box-shadow: 0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+          background-color: #f7f7f7;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          box-shadow: 0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+          color: #333;
+          display: inline-block;
+          font-family: 'Droid Sans Mono', monospace;
+          font-size: 80%;
+          font-weight: normal;
+          line-height: inherit;
+          margin: 0 .1em;
+          padding: .08em .4em;
+          text-shadow: 0 1px 0 #fff;
+          word-spacing: -4px;
+        
+          box-shadow: 2px 2px 2px #222; /* MA: An extra I've added. */
+        }
+        </style>
+        <link rel="stylesheet" type="text/css" href="https://alhassy.github.io/org-special-block-extras/tooltipster/dist/css/tooltipster.bundle.min.css"/>
+        
+        <link rel="stylesheet" type="text/css" href="https://alhassy.github.io/org-special-block-extras/tooltipster/dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-punk.min.css" />
+        
+        <script type="text/javascript">
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape('%3Cscript src="https://code.jquery.com/jquery-1.10.0.min.js"%3E%3C/script%3E'));
+            }
+        </script>
+        
+         <script type="text/javascript"            src="https://alhassy.github.io/org-special-block-extras/tooltipster/dist/js/tooltipster.bundle.min.js"></script>
+        
+          <script>
+                 $(document).ready(function() {
+                     $('.tooltip').tooltipster({
+                         theme: 'tooltipster-punk',
+                         contentAsHTML: true,
+                         animation: 'grow',
+                         delay: [100,500],
+                         // trigger: 'click'
+                         trigger: 'custom',
+                         triggerOpen: {
+                             mouseenter: true
+                         },
+                         triggerClose: {
+                             originClick: true,
+                             scroll: true
+                         }
+         });
+                 });
+             </script>
+        
+        <style>
+           abbr {color: red;}
+        
+           .tooltip { border-bottom: 1px dotted #000;
+                      color:red;
+                      text-decoration: none;}
+        </style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Unicode, Source Spans, Editor Tooling, and You</h1>
+
+<div id="outline-container-org82b2bc6" class="outline-2">
+<h2 id="org82b2bc6"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+One of the most difficult part of writing a programming language is
+creating good error messages. It's one thing to create a fancy new
+type theory that has some exellent features, but making that <i>usable</i> 
+adds a whole layer of complexity atop a very complex thing. This blog
+post aims to address one tiny, underdiscussed problem involved in
+doing this: properly handling source spans in the presence of Unicode.
+</p>
+</div>
+</div>
+<div id="outline-container-orgc034525" class="outline-2">
+<h2 id="orgc034525"><span class="section-number-2">2.</span> Variable Width Encodings</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Most of the advice surrounding source spans seems to focus on the fact
+that the popular Unicode encodings (UTF-8 and UTF-16) are
+<b>Variable Width Encodings</b>. This means that a single "character"<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>
+may be represented by a variable number of bytes. For instance, in UTF-8 all of
+the ASCII characters are represented by a single byte, but something
+like the 'λ' character is represented by 2 bytes. This seems to imply
+that byte indexing is fundamentally broken, as the number of bytes no longer
+lines up with a multiple of the number of characters.
+</p>
+
+<p>
+This leads to the very common advice to "use codepoints
+instead". Let's break down precisely what that means before we get
+into why (in this specific case) that is bad advice. In Unicode parlance,
+a <b>Codepoint</b> is a well-formed sequence of bits. These <i>usually</i> represent 
+single graphemes (what we think of as a character), but this is not
+always the case! For instance, consider the 'ä' character: this
+consists of 2 codepoints: one for the 'a' (0x61), and the other
+for the umlaut diacritic (0x308). If we were counting codepoints, then
+the column number for <code>foo</code> in the following source code would be incorrect:
+</p>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #b8bb26;">let</span> a&#776; <span style="color: #83a598;">=</span> foo
+        <span style="color: #83a598;">^^^</span>
+</pre>
+</div>
+
+<p>
+This is why "just use codepoints" is bad advice: codepoints do not
+line up with what we think of as characters.
+</p>
+</div>
+</div>
+<div id="outline-container-org01ad8ca" class="outline-2">
+<h2 id="org01ad8ca"><span class="section-number-2">3.</span> Grapheme Clusters</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+What we <i>should</i> be counting instead are <b>Grapheme
+Clusters</b>. These are defined to be "horizontally segmentable unit of text".
+In plain terms, these are what we think of as characters when we are
+using a computer. For instance, if you were to select a grapheme
+cluster like 'ä' in our editor, it would get selected as a single
+unit; there's no way to just select the 'a' or the umlaut.
+</p>
+
+<p>
+This may seem like the notion of "character" we are looking for, but
+the notion of "character" is, to be honest, a bit fuzzy.
+Is 🏳️‍🌈 a single character? Thise may render as a single glyph
+for some people, but this is in fact font-dependent. Many emojis are
+implemented via <a href="https://www.unicode.org/emoji/charts/emoji-zwj-sequences.html">Zero-Width-Joiner Sequences</a>: they consist of a bunch
+of existing emojis together with a magic "Zero-Width-Joiner" codepoint
+that hints to the font-renderer that, if possible, the sequence should
+be rendered as a single glyph. For instance, 🏳️‍🌈 is <i>really</i> 🏳️+ZWJ+🌈.
+This is very useful for when your font may not support an emoji: at
+the very least we can render something meaningful, and not ⍰.
+</p>
+
+<p>
+However, this makes even the notion of column numbers somewhat
+meaningless from an error-message perspective. If we can't determine
+how wide a user may percieve a glyph to be, we have no chance of giving
+a good column number! This means that there's only really a single
+2 meaningful operations one can do with a source spans: combine them,
+or use them to index into source code.
+</p>
+</div>
+</div>
+<div id="outline-container-org90ce214" class="outline-2">
+<h2 id="org90ce214"><span class="section-number-2">4.</span> Source Spans Done Right</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Now, with all of this talk of grapheme clusters, it may seem like they
+are the correct option, and we should use them as our source span indicies.
+Unfortunately, this isn't a viable solution for a couple of reasons.
+First, indexing by grapheme cluster will involve <a href="https://unicode.org/reports/tr29/">segmentation</a>, or the
+process of chopping up a unicode string into grapheme clusters. This
+is an O(n) operation, and as we've discussed before, doesn't even
+capture what a user will see on their display.
+</p>
+
+<p>
+We might then try to use codepoints, but this is also a mistake. As
+noted earlier, really all we can do with a span is slice into strings,
+and indexing by codepoints is an O(n) operation, which is unacceptable.
+</p>
+
+<p>
+This leaves byte-indexing, which may seem like sacrilege to many!
+We've all had "never byte-index UTF-8
+encoded text" hammered into our heads 10000 times. However, UTF-8 is a
+marvelously well-engineered encoding, and it is not possible to form
+valid code points by slicing existing code points in half. This means
+that if that our initial byte indexes lie on code point
+boundaries<sup><a id="fnr.2" class="footref" href="#fn.2" role="doc-backlink">2</a></sup>, then we can slice away to our hearts content.
+</p>
+
+<p>
+This leaves us with the following design for a span type:
+</p>
+<div class="org-src-container">
+<pre class="src src-haskell"><span style="color: #b8bb26;">data</span> <span style="color: #fabd2f;">Span</span> <span style="color: #83a598;">=</span> <span style="color: #fabd2f;">Span</span>
+    { start     <span style="color: #83a598;">::</span> <span style="color: #fabd2f;">Int</span>
+    <span style="color: #dfd2b8;">-- ^ The absolute position of the span start, in bytes.</span>
+    , startBol  <span style="color: #83a598;">::</span> <span style="color: #fabd2f;">Int</span>
+    <span style="color: #dfd2b8;">-- ^ The absolute position of the beginning of the line of span start, in bytes.</span>
+    , startLine <span style="color: #83a598;">::</span> <span style="color: #fabd2f;">Int</span>
+    <span style="color: #dfd2b8;">-- ^ The line number of the span start.</span>
+    , end       <span style="color: #83a598;">::</span> <span style="color: #fabd2f;">Int</span>
+    <span style="color: #dfd2b8;">-- ^ The absolute position of the span end, in bytes.</span>
+    , endBol    <span style="color: #83a598;">::</span> <span style="color: #fabd2f;">Int</span>
+    <span style="color: #dfd2b8;">-- ^ The absolute position of the beginning of the line of span end, in bytes.</span>
+    , stopLine  <span style="color: #83a598;">::</span> <span style="color: #fabd2f;">Int</span>
+    <span style="color: #dfd2b8;">-- ^ The line number of the span end.</span>
+    , filename  <span style="color: #83a598;">::</span> <span style="color: #fabd2f;">String</span>
+    <span style="color: #dfd2b8;">-- ^ The filename.</span>
+    }
+</pre>
+</div>
+
+<p>
+By tracking the start of the lines, it's easy to slice out entire
+lines, which is a common operation when working with spans. One might
+be tempted to compute column numbers by doing grapheme-cluster
+counting between the <code>startBol</code> and <code>start</code> fields, but as noted
+above, this is a fools errand. If we want to be correct, we have to
+accept that the notion of a column number is somewhat malformed.
+</p>
+</div>
+</div>
+<div id="outline-container-orgdc736ef" class="outline-2">
+<h2 id="orgdc736ef"><span class="section-number-2">5.</span> Source Spans and Error Messages</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+From here, it may be tempting to try and pretty-print spans in error
+messages using some sort of ASCII art or box-drawing
+characters. However, this too is a mistake, as it's basically
+impossible to figure out how wide the span will be on the users
+display, even when we ignore the problem of ZWJ sequences. As an
+extreme example, the ﷽ glyph is a single grapheme cluster<sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup>, so it
+will throw off any sort of underlining logic in your error rendering.
+Now, this may seem like a somewhat contrived example, but there are
+plenty of characters that someone may want to use that <i>may</i> render
+wider than a single cell. Furthermore, this is largely font-dependent,
+and is thus impossible to figure out how wide the character is without
+being able to interact with the device the error message is being
+rendered on (for instance, the terminal emulator).
+</p>
+
+<p>
+Instead, the best option is to take the advice of the Unicode
+Consortium themselves, and rely on markup languages or
+platform-specific features to handle styling of unicode text.
+For terminal display, this is best handled by <a href="https://vt100.net/docs/vt510-rm/SGR.html">SGR codes</a>
+for underlining, and other platforms/editors have their own mechanisms.
+</p>
+</div>
+</div>
+<div id="outline-container-orga66a340" class="outline-2">
+<h2 id="orga66a340"><span class="section-number-2">6.</span> Source Spans and Editor Tooling</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Now that we are properly handling error messages, we may want to write
+some editor tooling for our language. As of 2022, the most commonly
+used protocol for editor tooling is the the <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/">Language Server Protocol</a>,
+or LSP. As one might expect, a large part of the protocol involves
+communicating information about various source positions/spans. This
+is where things get somewhat difficult. LSP expects us to specify
+positions in terms of codepoints, but we want to use byte-indexing for
+our spans, and it's going to be an O(n) operation to convert these
+into codepoints.
+</p>
+
+<p>
+To make matters more complex, as LSP was developed at Microsoft,
+they chose <b>UTF-16</b> codepoints as their default position index. Before
+LSP 3.17 this was your only choice, but now there is the option to
+perform a <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#serverCapabilities">negotiation step</a> upon server startup to chose the position
+encoding type. However, for backwards compatibility reasons, servers
+are still required to support UTF-16 codepoints, which makes the
+following advice regarding byte-indexed spans entirely moot.
+</p>
+
+<p>
+However, many clients<sup><a id="fnr.4" class="footref" href="#fn.4" role="doc-backlink">4</a></sup> either <i>only</i> support UTF-8 positions, or
+provide support for UTF-8 positions, so in my opinion it's a much more
+reasonable option to disregard the spec and only provide support for UTF-8.
+Dealing with Unicode is tricky enough, we don't need to make it worse
+on ourselves by tying ourselves to some poor engineering choices.
+</p>
+
+<p>
+Another alternative is to follow <code>clangd</code>'s lead, and implement the
+<a href="https://clangd.llvm.org/extensions.html#utf-8-offsets">UTF-8 offset extension</a> to the protocol. This allows us to advertise to
+clients that we support byte-indexed positions, which, as discussed
+above, are the most optimal choice from a performance
+perspective. This is implemented by <i>most</i> clients (though less than
+UTF-8 codepoints). Hopefully Microsoft will realize that this is a good
+idea, and add it to the standard in the future.
+</p>
+</div>
+</div>
+<div id="outline-container-orge945e5f" class="outline-2">
+<h2 id="orge945e5f"><span class="section-number-2">7.</span> Conclusion</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+In summary, if you are trying to add source spans to your language:
+</p>
+<ul class="org-ul">
+<li>Spans should only be used to slice/index source code.</li>
+<li>Don't include column numbers in error messages: they are rife with
+edge cases.</li>
+<li>If you have to include column numbers: count grapheme clusters instead.</li>
+<li>Don't try to underline errors with ASCII art or box-drawing characters,
+use SGR or other more semantic mechanisms instead.</li>
+<li>Use byte-indexed spans if you don't need to support LSP.</li>
+<li>Use UTF-8 codepoint-indexed spans if you want to support all LSP clients.</li>
+<li>Use the <code>clangd</code> UTF-8 offset extension if you want to have the most
+optimal implementation possible.</li>
+</ul>
+
+<p>
+Now, go out into the world, and write some programming languages 🙂
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+Calling these characters is a bit of a misnomer, as we will
+discuss later.
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+It's actually possible to check if a byte-index lies on a
+codepoint boundary just by indexing. As mentioned earlier, UTF-8 is
+very well engineered!
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+﷽ is actually a single codepoint too!
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+From a quick survery, <a href="https://github.com/emacs-lsp/lsp-mode">lsp-mode</a> <i>only</i> supports UTF-8 (see <a href="https://github.com/emacs-lsp/lsp-mode/issues/2080">here</a>
+and <a href="https://github.com/emacs-lsp/lsp-mode/issues/3344">here</a>), <a href="https://github.com/joaotavora/eglot">elgot</a> only supports UTF-8 by default (see <a href="https://github.com/joaotavora/eglot/issues/244">here</a>), and both
+<a href="https://code.visualstudio.com/">VsCode</a> and <a href="https://neovim.io">NeoVim</a> support UTF-8 (see <a href="https://neovim.io/doc/user/lsp.html">here</a>).
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="author">Author: Reed Mullanix</p>
+<p class="date">Created: 2022-06-08 Wed 18:04</p>
+</div>
+</body>
+</html>
