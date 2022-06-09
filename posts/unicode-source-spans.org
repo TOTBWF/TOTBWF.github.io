@@ -131,17 +131,20 @@ some editor tooling for our language. As of 2022, the most commonly
 used protocol for editor tooling is the the [[https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/][Language Server Protocol]],
 or LSP. As one might expect, a large part of the protocol involves
 communicating information about various source positions/spans. This
-is where things get somewhat difficult. LSP expects us to specify
-positions in terms of codepoints, but we want to use byte-indexing for
-our spans, and it's going to be an O(n) operation to convert these
-into codepoints.
+is where things get somewhat difficult.
 
-To make matters more complex, as LSP was developed at Microsoft,
-they chose *UTF-16* codepoints as their default position index. Before
-LSP 3.17 this was your only choice, but now there is the option to
-perform a [[https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#serverCapabilities][negotiation step]] upon server startup to chose the position
-encoding type. However, for backwards compatibility reasons, servers
-are still required to support UTF-16 codepoints, which makes the
+Before diving into the details, we need to discuss another bit of
+Unicode terminology: *Codeunits*. These measure the atomic unit
+of memory used to store codepoints. For UTF-8 these are just bytes,
+but larger encodings require larger code units (2 bytes for UTF-16,
+and 4 for UTF-32 respectively).
+
+Now, LSP was developed at Microsoft and was originally geared towards
+Javascript, so they chose *UTF-16* codeunits as their default unit of offset.
+Before LSP 3.17 this was your only choice, but luckily there is now
+the option to perform a [[https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#serverCapabilities][negotiation step]] upon server startup to choose
+the offset units used. However, for backwards compatibility reasons, servers
+are still required to support UTF-16 codeunits, which makes the
 following advice regarding byte-indexed spans entirely moot.
 
 However, many clients[fn:lsp-utf8] either /only/ support UTF-8 positions, or
@@ -149,14 +152,6 @@ provide support for UTF-8 positions, so in my opinion it's a much more
 reasonable option to disregard the spec and only provide support for UTF-8.
 Dealing with Unicode is tricky enough, we don't need to make it worse
 on ourselves by tying ourselves to some poor engineering choices.
-
-Another alternative is to follow =clangd='s lead, and implement the
-[[https://clangd.llvm.org/extensions.html#utf-8-offsets][UTF-8 offset extension]] to the protocol. This allows us to advertise to
-clients that we support byte-indexed positions, which, as discussed
-above, are the most optimal choice from a performance
-perspective. This is implemented by /most/ clients (though less than
-UTF-8 codepoints). Hopefully Microsoft will realize that this is a good
-idea, and add it to the standard in the future.
 * Conclusion
 In summary, if you are trying to add source spans to your language:
 - Spans should only be used to slice/index source code.
@@ -165,10 +160,7 @@ In summary, if you are trying to add source spans to your language:
 - If you have to include column numbers: count grapheme clusters instead.
 - Don't try to underline errors with ASCII art or box-drawing characters,
   use SGR or other more semantic mechanisms instead.
-- Use byte-indexed spans if you don't need to support LSP.
-- Use UTF-8 codepoint-indexed spans if you want to support all LSP clients.
-- Use the =clangd= UTF-8 offset extension if you want to have the most
-  optimal implementation possible.
+- Use byte-indexed spans, even if you want to support LSP.
 
 Now, go out into the world, and write some programming languages 🙂
 

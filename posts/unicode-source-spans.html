@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-08 Wed 18:27 -->
+<!-- 2022-06-09 Thu 08:51 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Unicode, Source Spans, Editor Tooling, and You</title>
@@ -274,8 +274,8 @@
 <div id="content" class="content">
 <h1 class="title">Unicode, Source Spans, Editor Tooling, and You</h1>
 
-<div id="outline-container-orgc348c27" class="outline-2">
-<h2 id="orgc348c27"><span class="section-number-2">1.</span> Introduction</h2>
+<div id="outline-container-org5e875b7" class="outline-2">
+<h2 id="org5e875b7"><span class="section-number-2">1.</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 One of the most difficult part of writing a programming language is
@@ -287,8 +287,8 @@ doing this: properly handling source spans in the presence of Unicode.
 </p>
 </div>
 </div>
-<div id="outline-container-orgca9b7a4" class="outline-2">
-<h2 id="orgca9b7a4"><span class="section-number-2">2.</span> Variable Width Encodings</h2>
+<div id="outline-container-org40b6ceb" class="outline-2">
+<h2 id="org40b6ceb"><span class="section-number-2">2.</span> Variable Width Encodings</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Most of the advice surrounding source spans seems to focus on the fact
@@ -324,8 +324,8 @@ line up with what we think of as characters.
 </p>
 </div>
 </div>
-<div id="outline-container-orgb852f3c" class="outline-2">
-<h2 id="orgb852f3c"><span class="section-number-2">3.</span> Grapheme Clusters</h2>
+<div id="outline-container-orga33922a" class="outline-2">
+<h2 id="orga33922a"><span class="section-number-2">3.</span> Grapheme Clusters</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 What we <i>should</i> be counting instead are <b>Grapheme
@@ -359,8 +359,8 @@ or use them to index into source code.
 </p>
 </div>
 </div>
-<div id="outline-container-org369b81d" class="outline-2">
-<h2 id="org369b81d"><span class="section-number-2">4.</span> Source Spans Done Right</h2>
+<div id="outline-container-org4fb3ce2" class="outline-2">
+<h2 id="org4fb3ce2"><span class="section-number-2">4.</span> Source Spans Done Right</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Now, with all of this talk of grapheme clusters, it may seem like they
@@ -421,8 +421,8 @@ accept that the notion of a column number is somewhat malformed.
 </p>
 </div>
 </div>
-<div id="outline-container-org17b30e7" class="outline-2">
-<h2 id="org17b30e7"><span class="section-number-2">5.</span> Source Spans and Error Messages</h2>
+<div id="outline-container-orgf2a6698" class="outline-2">
+<h2 id="orgf2a6698"><span class="section-number-2">5.</span> Source Spans and Error Messages</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 From here, it may be tempting to try and pretty-print spans in error
@@ -449,8 +449,8 @@ for underlining, and other platforms/editors have their own mechanisms.
 </p>
 </div>
 </div>
-<div id="outline-container-org46a51fc" class="outline-2">
-<h2 id="org46a51fc"><span class="section-number-2">6.</span> Source Spans and Editor Tooling</h2>
+<div id="outline-container-org921618d" class="outline-2">
+<h2 id="org921618d"><span class="section-number-2">6.</span> Source Spans and Editor Tooling</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 Now that we are properly handling error messages, we may want to write
@@ -458,19 +458,24 @@ some editor tooling for our language. As of 2022, the most commonly
 used protocol for editor tooling is the the <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/">Language Server Protocol</a>,
 or LSP. As one might expect, a large part of the protocol involves
 communicating information about various source positions/spans. This
-is where things get somewhat difficult. LSP expects us to specify
-positions in terms of codepoints, but we want to use byte-indexing for
-our spans, and it's going to be an O(n) operation to convert these
-into codepoints.
+is where things get somewhat difficult.
 </p>
 
 <p>
-To make matters more complex, as LSP was developed at Microsoft,
-they chose <b>UTF-16</b> codepoints as their default position index. Before
-LSP 3.17 this was your only choice, but now there is the option to
-perform a <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#serverCapabilities">negotiation step</a> upon server startup to chose the position
-encoding type. However, for backwards compatibility reasons, servers
-are still required to support UTF-16 codepoints, which makes the
+Before diving into the details, we need to discuss another bit of
+Unicode terminology: <b>Codeunits</b>. These measure the atomic unit
+of memory used to store codepoints. For UTF-8 these are just bytes,
+but larger encodings require larger code units (2 bytes for UTF-16,
+and 4 for UTF-32 respectively).
+</p>
+
+<p>
+Now, LSP was developed at Microsoft and was originally geared towards
+Javascript, so they chose <b>UTF-16</b> codeunits as their default unit of offset.
+Before LSP 3.17 this was your only choice, but luckily there is now
+the option to perform a <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#serverCapabilities">negotiation step</a> upon server startup to choose
+the offset units used. However, for backwards compatibility reasons, servers
+are still required to support UTF-16 codeunits, which makes the
 following advice regarding byte-indexed spans entirely moot.
 </p>
 
@@ -481,20 +486,10 @@ reasonable option to disregard the spec and only provide support for UTF-8.
 Dealing with Unicode is tricky enough, we don't need to make it worse
 on ourselves by tying ourselves to some poor engineering choices.
 </p>
-
-<p>
-Another alternative is to follow <code>clangd</code>'s lead, and implement the
-<a href="https://clangd.llvm.org/extensions.html#utf-8-offsets">UTF-8 offset extension</a> to the protocol. This allows us to advertise to
-clients that we support byte-indexed positions, which, as discussed
-above, are the most optimal choice from a performance
-perspective. This is implemented by <i>most</i> clients (though less than
-UTF-8 codepoints). Hopefully Microsoft will realize that this is a good
-idea, and add it to the standard in the future.
-</p>
 </div>
 </div>
-<div id="outline-container-org924194e" class="outline-2">
-<h2 id="org924194e"><span class="section-number-2">7.</span> Conclusion</h2>
+<div id="outline-container-org698894d" class="outline-2">
+<h2 id="org698894d"><span class="section-number-2">7.</span> Conclusion</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 In summary, if you are trying to add source spans to your language:
@@ -506,10 +501,7 @@ edge cases.</li>
 <li>If you have to include column numbers: count grapheme clusters instead.</li>
 <li>Don't try to underline errors with ASCII art or box-drawing characters,
 use SGR or other more semantic mechanisms instead.</li>
-<li>Use byte-indexed spans if you don't need to support LSP.</li>
-<li>Use UTF-8 codepoint-indexed spans if you want to support all LSP clients.</li>
-<li>Use the <code>clangd</code> UTF-8 offset extension if you want to have the most
-optimal implementation possible.</li>
+<li>Use byte-indexed spans, even if you want to support LSP.</li>
 </ul>
 
 <p>
@@ -552,7 +544,7 @@ and <a href="https://github.com/emacs-lsp/lsp-mode/issues/3344">here</a>), <a hr
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Reed Mullanix</p>
-<p class="date">Created: 2022-06-08 Wed 18:27</p>
+<p class="date">Created: 2022-06-09 Thu 08:51</p>
 </div>
 </body>
 </html>
