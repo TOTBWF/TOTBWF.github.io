@@ -10,7 +10,7 @@ doing this: properly handling source spans in the presence of Unicode.
 * Variable Width Encodings
 Most of the advice surrounding source spans seems to focus on the fact
 that the popular Unicode encodings (UTF-8 and UTF-16) are
-*Variable Width Encodings*. This means that a single "character"[fn:1]
+*Variable Width Encodings*. This means that a single "character"[fn:character]
 may be represented by a variable number of bytes. For instance, in UTF-8 all of
 the ASCII characters are represented by a single byte, but something
 like the 'λ' character is represented by 2 bytes. This seems to imply
@@ -22,7 +22,7 @@ instead". Let's break down precisely what that means before we get
 into why (in this specific case) that is bad advice. In Unicode parlance,
 a *Codepoint* is a well-formed sequence of bits. These /usually/ represent 
 single graphemes (what we think of as a character), but this is not
-always the case! For instance, consider the 'ä' character: this
+always the case! For instance, consider the 'ä'[fn:normalization] character: this
 consists of 2 codepoints: one for the 'a' (0x61), and the other
 for the umlaut diacritic (0x308). If we were counting codepoints, then
 the column number for ~foo~ in the following source code would be incorrect:
@@ -43,7 +43,7 @@ unit; there's no way to just select the 'a' or the umlaut.
 
 This may seem like the notion of "character" we are looking for, but
 the notion of "character" is, to be honest, a bit fuzzy.
-Is 🏳️‍🌈 a single character? Thise may render as a single glyph
+Is 🏳️‍🌈 a single character? This may render as a single glyph
 for some people, but this is in fact font-dependent. Many emojis are
 implemented via [[https://www.unicode.org/emoji/charts/emoji-zwj-sequences.html][Zero-Width-Joiner Sequences]]: they consist of a bunch
 of existing emojis together with a magic "Zero-Width-Joiner" codepoint
@@ -75,9 +75,9 @@ This leaves byte-indexing, which may seem like sacrilege to many!
 We've all had "never byte-index UTF-8
 encoded text" hammered into our heads 10000 times. However, UTF-8 is a
 marvelously well-engineered encoding, and it is not possible to form
-valid code points by slicing existing code points in half. This means
-that if that our initial byte indexes lie on code point
-boundaries[fn:2], then we can slice away to our hearts content.
+valid codepoints by slicing existing codepoints in half. This means
+that if that our initial byte indexes lie on codepoint
+boundaries[fn:indexing], then we can slice away to our hearts content.
 
 This leaves us with the following design for a span type:
 #+BEGIN_SRC haskell
@@ -111,7 +111,7 @@ messages using some sort of ASCII art or box-drawing
 characters. However, this too is a mistake, as it's basically
 impossible to figure out how wide the span will be on the users
 display, even when we ignore the problem of ZWJ sequences. As an
-extreme example, the ﷽ glyph is a single grapheme cluster[fn:3], so it
+extreme example, the ﷽ glyph is a single grapheme cluster[fn:bismillah], so it
 will throw off any sort of underlining logic in your error rendering.
 Now, this may seem like a somewhat contrived example, but there are
 plenty of characters that someone may want to use that /may/ render
@@ -144,7 +144,7 @@ encoding type. However, for backwards compatibility reasons, servers
 are still required to support UTF-16 codepoints, which makes the
 following advice regarding byte-indexed spans entirely moot.
 
-However, many clients[fn:4] either /only/ support UTF-8 positions, or
+However, many clients[fn:lsp-utf8] either /only/ support UTF-8 positions, or
 provide support for UTF-8 positions, so in my opinion it's a much more
 reasonable option to disregard the spec and only provide support for UTF-8.
 Dealing with Unicode is tricky enough, we don't need to make it worse
@@ -172,12 +172,14 @@ In summary, if you are trying to add source spans to your language:
 
 Now, go out into the world, and write some programming languages 🙂
 
-[fn:1] Calling these characters is a bit of a misnomer, as we will
+[fn:character] Calling these characters is a bit of a misnomer, as we will
 discuss later.
-[fn:2] It's actually possible to check if a byte-index lies on a
+[fn:normalization] Technically this /can/ be represented by a single
+codepoint under some circumstances. For a technical discussion, see [[https://www.unicode.org/reports/tr15/][this]].
+[fn:indexing] It's actually possible to check if a byte-index lies on a
 codepoint boundary just by indexing. As mentioned earlier, UTF-8 is
 very well engineered!
-[fn:3] ﷽ is actually a single codepoint too!
-[fn:4] From a quick survery, [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]] /only/ supports UTF-8 (see [[https://github.com/emacs-lsp/lsp-mode/issues/2080][here]]
+[fn:bismillah] ﷽ is actually a single codepoint too!
+[fn:lsp-utf8] From a quick survery, [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]] /only/ supports UTF-8 (see [[https://github.com/emacs-lsp/lsp-mode/issues/2080][here]]
 and [[https://github.com/emacs-lsp/lsp-mode/issues/3344][here]]), [[https://github.com/joaotavora/eglot][elgot]] only supports UTF-8 by default (see [[https://github.com/joaotavora/eglot/issues/244][here]]), and both
 [[https://code.visualstudio.com/][VsCode]] and [[https://neovim.io][NeoVim]] support UTF-8 (see [[https://neovim.io/doc/user/lsp.html][here]]).

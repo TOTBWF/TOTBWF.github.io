@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-08 Wed 18:04 -->
+<!-- 2022-06-08 Wed 18:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Unicode, Source Spans, Editor Tooling, and You</title>
@@ -274,8 +274,8 @@
 <div id="content" class="content">
 <h1 class="title">Unicode, Source Spans, Editor Tooling, and You</h1>
 
-<div id="outline-container-org82b2bc6" class="outline-2">
-<h2 id="org82b2bc6"><span class="section-number-2">1.</span> Introduction</h2>
+<div id="outline-container-orgc348c27" class="outline-2">
+<h2 id="orgc348c27"><span class="section-number-2">1.</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 One of the most difficult part of writing a programming language is
@@ -287,8 +287,8 @@ doing this: properly handling source spans in the presence of Unicode.
 </p>
 </div>
 </div>
-<div id="outline-container-orgc034525" class="outline-2">
-<h2 id="orgc034525"><span class="section-number-2">2.</span> Variable Width Encodings</h2>
+<div id="outline-container-orgca9b7a4" class="outline-2">
+<h2 id="orgca9b7a4"><span class="section-number-2">2.</span> Variable Width Encodings</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Most of the advice surrounding source spans seems to focus on the fact
@@ -307,7 +307,7 @@ instead". Let's break down precisely what that means before we get
 into why (in this specific case) that is bad advice. In Unicode parlance,
 a <b>Codepoint</b> is a well-formed sequence of bits. These <i>usually</i> represent 
 single graphemes (what we think of as a character), but this is not
-always the case! For instance, consider the 'ä' character: this
+always the case! For instance, consider the 'ä'<sup><a id="fnr.2" class="footref" href="#fn.2" role="doc-backlink">2</a></sup> character: this
 consists of 2 codepoints: one for the 'a' (0x61), and the other
 for the umlaut diacritic (0x308). If we were counting codepoints, then
 the column number for <code>foo</code> in the following source code would be incorrect:
@@ -324,8 +324,8 @@ line up with what we think of as characters.
 </p>
 </div>
 </div>
-<div id="outline-container-org01ad8ca" class="outline-2">
-<h2 id="org01ad8ca"><span class="section-number-2">3.</span> Grapheme Clusters</h2>
+<div id="outline-container-orgb852f3c" class="outline-2">
+<h2 id="orgb852f3c"><span class="section-number-2">3.</span> Grapheme Clusters</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 What we <i>should</i> be counting instead are <b>Grapheme
@@ -339,7 +339,7 @@ unit; there's no way to just select the 'a' or the umlaut.
 <p>
 This may seem like the notion of "character" we are looking for, but
 the notion of "character" is, to be honest, a bit fuzzy.
-Is 🏳️‍🌈 a single character? Thise may render as a single glyph
+Is 🏳️‍🌈 a single character? This may render as a single glyph
 for some people, but this is in fact font-dependent. Many emojis are
 implemented via <a href="https://www.unicode.org/emoji/charts/emoji-zwj-sequences.html">Zero-Width-Joiner Sequences</a>: they consist of a bunch
 of existing emojis together with a magic "Zero-Width-Joiner" codepoint
@@ -359,8 +359,8 @@ or use them to index into source code.
 </p>
 </div>
 </div>
-<div id="outline-container-org90ce214" class="outline-2">
-<h2 id="org90ce214"><span class="section-number-2">4.</span> Source Spans Done Right</h2>
+<div id="outline-container-org369b81d" class="outline-2">
+<h2 id="org369b81d"><span class="section-number-2">4.</span> Source Spans Done Right</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Now, with all of this talk of grapheme clusters, it may seem like they
@@ -383,9 +383,9 @@ This leaves byte-indexing, which may seem like sacrilege to many!
 We've all had "never byte-index UTF-8
 encoded text" hammered into our heads 10000 times. However, UTF-8 is a
 marvelously well-engineered encoding, and it is not possible to form
-valid code points by slicing existing code points in half. This means
-that if that our initial byte indexes lie on code point
-boundaries<sup><a id="fnr.2" class="footref" href="#fn.2" role="doc-backlink">2</a></sup>, then we can slice away to our hearts content.
+valid codepoints by slicing existing codepoints in half. This means
+that if that our initial byte indexes lie on codepoint
+boundaries<sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup>, then we can slice away to our hearts content.
 </p>
 
 <p>
@@ -421,8 +421,8 @@ accept that the notion of a column number is somewhat malformed.
 </p>
 </div>
 </div>
-<div id="outline-container-orgdc736ef" class="outline-2">
-<h2 id="orgdc736ef"><span class="section-number-2">5.</span> Source Spans and Error Messages</h2>
+<div id="outline-container-org17b30e7" class="outline-2">
+<h2 id="org17b30e7"><span class="section-number-2">5.</span> Source Spans and Error Messages</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 From here, it may be tempting to try and pretty-print spans in error
@@ -430,7 +430,7 @@ messages using some sort of ASCII art or box-drawing
 characters. However, this too is a mistake, as it's basically
 impossible to figure out how wide the span will be on the users
 display, even when we ignore the problem of ZWJ sequences. As an
-extreme example, the ﷽ glyph is a single grapheme cluster<sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup>, so it
+extreme example, the ﷽ glyph is a single grapheme cluster<sup><a id="fnr.4" class="footref" href="#fn.4" role="doc-backlink">4</a></sup>, so it
 will throw off any sort of underlining logic in your error rendering.
 Now, this may seem like a somewhat contrived example, but there are
 plenty of characters that someone may want to use that <i>may</i> render
@@ -449,8 +449,8 @@ for underlining, and other platforms/editors have their own mechanisms.
 </p>
 </div>
 </div>
-<div id="outline-container-orga66a340" class="outline-2">
-<h2 id="orga66a340"><span class="section-number-2">6.</span> Source Spans and Editor Tooling</h2>
+<div id="outline-container-org46a51fc" class="outline-2">
+<h2 id="org46a51fc"><span class="section-number-2">6.</span> Source Spans and Editor Tooling</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 Now that we are properly handling error messages, we may want to write
@@ -475,7 +475,7 @@ following advice regarding byte-indexed spans entirely moot.
 </p>
 
 <p>
-However, many clients<sup><a id="fnr.4" class="footref" href="#fn.4" role="doc-backlink">4</a></sup> either <i>only</i> support UTF-8 positions, or
+However, many clients<sup><a id="fnr.5" class="footref" href="#fn.5" role="doc-backlink">5</a></sup> either <i>only</i> support UTF-8 positions, or
 provide support for UTF-8 positions, so in my opinion it's a much more
 reasonable option to disregard the spec and only provide support for UTF-8.
 Dealing with Unicode is tricky enough, we don't need to make it worse
@@ -493,8 +493,8 @@ idea, and add it to the standard in the future.
 </p>
 </div>
 </div>
-<div id="outline-container-orge945e5f" class="outline-2">
-<h2 id="orge945e5f"><span class="section-number-2">7.</span> Conclusion</h2>
+<div id="outline-container-org924194e" class="outline-2">
+<h2 id="org924194e"><span class="section-number-2">7.</span> Conclusion</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 In summary, if you are trying to add source spans to your language:
@@ -527,16 +527,21 @@ discuss later.
 </p></div></div>
 
 <div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+Technically this <i>can</i> be represented by a single
+codepoint under some circumstances. For a technical discussion, see <a href="https://www.unicode.org/reports/tr15/">this</a>.
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 It's actually possible to check if a byte-index lies on a
 codepoint boundary just by indexing. As mentioned earlier, UTF-8 is
 very well engineered!
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 ﷽ is actually a single codepoint too!
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5" role="doc-backlink">5</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 From a quick survery, <a href="https://github.com/emacs-lsp/lsp-mode">lsp-mode</a> <i>only</i> supports UTF-8 (see <a href="https://github.com/emacs-lsp/lsp-mode/issues/2080">here</a>
 and <a href="https://github.com/emacs-lsp/lsp-mode/issues/3344">here</a>), <a href="https://github.com/joaotavora/eglot">elgot</a> only supports UTF-8 by default (see <a href="https://github.com/joaotavora/eglot/issues/244">here</a>), and both
 <a href="https://code.visualstudio.com/">VsCode</a> and <a href="https://neovim.io">NeoVim</a> support UTF-8 (see <a href="https://neovim.io/doc/user/lsp.html">here</a>).
@@ -547,7 +552,7 @@ and <a href="https://github.com/emacs-lsp/lsp-mode/issues/3344">here</a>), <a hr
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Reed Mullanix</p>
-<p class="date">Created: 2022-06-08 Wed 18:04</p>
+<p class="date">Created: 2022-06-08 Wed 18:27</p>
 </div>
 </body>
 </html>
